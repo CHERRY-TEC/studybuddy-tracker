@@ -6,6 +6,8 @@
     <title>StudyBuddy Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         :root{--primary:#6c5ce7;--primary-light:#a29bfe;--secondary:#00cec9;--accent:#fd79a8;--bg:#0a0a1a;--bg2:#12122a;--bg3:#1a1a3e;--text:#fff;--muted:#8888aa;--success:#00b894;--warning:#fdcb6e;--danger:#e17055}
@@ -199,6 +201,8 @@
                 <button onclick="showPage('friends')"><i class="fas fa-user-plus"></i> Friends</button>
             </nav>
             <div class="hdr-right">
+                <span id="syncStatus" style="font-size:.75rem;display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)" onclick="openModal('fbSetup')"><i class="fas fa-cloud" style="color:var(--muted)"></i> Local</span>
+                <button class="theme-btn" onclick="openModal('notif')" title="Notifications" style="position:relative"><i class="fas fa-bell"></i><span id="notifBadge" style="display:none;position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:var(--danger);border-radius:50%;font-size:.55rem;color:#fff"></span></button>
                 <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon" id="themeIcon"></i></button>
                 <div class="ft" id="friendToggle"></div>
             </div>
@@ -426,11 +430,16 @@
                         </div>
                         <button class="btn bs" onclick="generateMyCode()" style="width:100%;margin-top:8px"><i class="fas fa-sync-alt"></i> Generate Code</button>
                     </div>
-                    <div style="background:rgba(0,206,201,.08);border-radius:10px;padding:16px">
+                    <div style="background:rgba(0,206,201,.08);border-radius:10px;padding:16px;margin-bottom:16px">
                         <h3 style="font-size:.9rem;margin-bottom:6px">Add Friend by Code</h3>
                         <div class="fg"><input type="text" id="addFriendCode" placeholder="Enter 6-digit code..." style="font-family:monospace;letter-spacing:1px"></div>
                         <div class="fg"><label>Friend's Name</label><input type="text" id="addFriendName" placeholder="e.g., Rahul"></div>
                         <button class="btn bgs" onclick="addFriendByCode()" style="width:100%"><i class="fas fa-user-plus"></i> Add Friend</button>
+                    </div>
+                    <div style="background:rgba(253,203,110,.08);border-radius:10px;padding:16px">
+                        <h3 style="font-size:.9rem;margin-bottom:6px">🔄 Real-Time Sync</h3>
+                        <p style="font-size:.75rem;color:var(--muted);margin-bottom:8px">Connect both phones to see each other's activities instantly. Tap below to setup.</p>
+                        <button class="btn bwy" onclick="loadFirebaseConfigIntoForm();openModal('fbSetup')" style="width:100%"><i class="fas fa-cog"></i> Setup Sync (Free Firebase)</button>
                     </div>
                 </div>
                 <div class="cd">
@@ -493,6 +502,36 @@
         <div class="ma"><button class="btn bc" onclick="closeModal('schedule')">Cancel</button><button class="btn bp" onclick="addSchedule()">Add</button></div>
     </div></div>
 
+    <div class="mo" id="fbSetupModal"><div class="mdl" style="max-width:520px">
+        <h2 style="margin-bottom:12px"><i class="fas fa-cloud" style="color:var(--warning)"></i> Setup Real-Time Sync</h2>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Follow these steps to sync data between both phones:</p>
+        <div style="background:rgba(108,92,231,.08);border-radius:10px;padding:14px;margin-bottom:12px;font-size:.8rem;line-height:1.6">
+            <strong>Step 1:</strong> Go to <a href="https://console.firebase.google.com" target="_blank" style="color:var(--primary-light)">console.firebase.google.com</a><br>
+            <strong>Step 2:</strong> Click <b>Add project</b> → name it anything (e.g., "studybuddy") → Create<br>
+            <strong>Step 3:</strong> Click <b>Realtime Database</b> → Create Database → Start in <b>test mode</b><br>
+            <strong>Step 4:</strong> Click <b>Settings</b> (gear icon) → <b>Project settings</b><br>
+            <strong>Step 5:</strong> Scroll to <b>Your apps</b> → click <b>Web</b> (</>) icon → register app → copy the config<br>
+            <strong>Step 6:</strong> Paste the config values below
+        </div>
+        <div class="fg"><label>API Key</label><input type="text" id="fbApiKey" placeholder="AIzaSy..."></div>
+        <div class="fg"><label>Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="your-project.firebaseapp.com"></div>
+        <div class="fg"><label>Database URL</label><input type="text" id="fbDatabaseURL" placeholder="https://your-project-default-rtdb.firebaseio.com"></div>
+        <div class="fg"><label>Project ID</label><input type="text" id="fbProjectId" placeholder="your-project-id"></div>
+        <div class="fg"><label>Storage Bucket</label><input type="text" id="fbStorageBucket" placeholder="your-project.appspot.com"></div>
+        <div class="fg"><label>App ID</label><input type="text" id="fbAppId" placeholder="1:123456789:web:abcdef"></div>
+        <div class="ma">
+            <button class="btn bc" onclick="closeModal('fbSetup')">Cancel</button>
+            <button class="btn bgs" onclick="saveFirebaseSetup()"><i class="fas fa-check"></i> Save & Connect</button>
+        </div>
+        <div id="fbSetupStatus" style="margin-top:12px;font-size:.8rem;text-align:center"></div>
+    </div></div>
+
+    <div class="mo" id="notifModal"><div class="mdl" style="max-width:420px">
+        <h2 style="margin-bottom:16px"><i class="fas fa-bell" style="color:var(--warning)"></i> Notifications</h2>
+        <div id="notifList" class="al"></div>
+        <div class="ma"><button class="btn bc" onclick="closeModal('notif')">Close</button></div>
+    </div></div>
+
     <div class="mo" id="friendProfileModal"><div class="mdl" style="max-width:560px">
         <div id="friendProfileContent"></div>
         <div class="ma"><button class="btn bc" onclick="closeModal('friendProfile')">Close</button><button class="btn bp" onclick="switchFriendFromProfile()">Switch to This Friend</button></div>
@@ -521,8 +560,153 @@
         if(s){const p=JSON.parse(s);p.friendCodes=p.friendCodes||{};p.messages=p.messages||[];p.reminders=p.reminders||[];p.moods=p.moods||{};p.challenges=p.challenges||[];p.schedule=p.schedule||[];p.dailyTarget=p.dailyTarget||4;return p}
         return{friends:{1:{name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0}},friendCodes:{},messages:[],reminders:[],moods:{},challenges:[],schedule:[],dailyTarget:4}
     }
-    function saveData(d){localStorage.setItem('friendsTracker',JSON.stringify(d))}
+    function saveData(d){localStorage.setItem('friendsTracker',JSON.stringify(d));syncToFirebase()}
     let data=loadData();
+
+    // ===== FIREBASE SYNC =====
+    let fbDb=null,syncEnabled=false,myUserId=null;
+    function loadFirebaseConfig(){
+        const s=localStorage.getItem('fbConfig');
+        if(s)try{return JSON.parse(s)}catch(e){}
+        return null;
+    }
+    function saveFirebaseConfig(cfg){localStorage.setItem('fbConfig',JSON.stringify(cfg))}
+    function initFirebase(){
+        try{
+            const cfg=loadFirebaseConfig();
+            if(!cfg||!cfg.apiKey||cfg.apiKey.length<20)return;
+            if(typeof firebase==='undefined')return;
+            firebase.initializeApp(cfg);
+            fbDb=firebase.database();
+            syncEnabled=true;
+            myUserId=data.myUserId||genCode();
+            if(!data.myUserId){data.myUserId=myUserId;localStorage.setItem('friendsTracker',JSON.stringify(data))}
+            console.log('Firebase connected');
+            listenFromFirebase();
+            updateSyncStatus('connected');
+        }catch(e){console.log('Firebase init failed:',e);updateSyncStatus('error')}
+    }
+    function updateSyncStatus(status){
+        const el=document.getElementById('syncStatus');
+        if(!el)return;
+        if(status==='connected'){el.innerHTML='<i class="fas fa-cloud" style="color:var(--success)"></i> Synced';el.title='Firebase connected - data syncs across devices'}
+        else if(status==='syncing'){el.innerHTML='<i class="fas fa-sync fa-spin" style="color:var(--warning)"></i> Syncing...'}
+        else if(status==='error'){el.innerHTML='<i class="fas fa-cloud" style="color:var(--danger)"></i> Offline';el.title='Firebase not configured - click to setup'}
+        else{el.innerHTML='<i class="fas fa-cloud" style="color:var(--muted)"></i> Local';el.title='Local mode - click Friends page to setup sync'}
+    }
+    function syncToFirebase(){
+        if(!syncEnabled||!fbDb)return;
+        updateSyncStatus('syncing');
+        try{
+            const myCode=data.friends[1].myCode;
+            if(!myCode){updateSyncStatus('error');return}
+            const syncData=JSON.parse(JSON.stringify(data));
+            syncData.syncTimestamp=Date.now();
+            fbDb.ref('users/'+myCode).set(syncData).then(()=>{
+                updateSyncStatus('connected');
+            }).catch(()=>updateSyncStatus('error'));
+        }catch(e){console.log('Sync failed:',e);updateSyncStatus('error')}
+    }
+    function listenFromFirebase(){
+        if(!syncEnabled||!fbDb)return;
+        const myCode=data.friends[1].myCode;
+        if(!myCode)return;
+        // Listen for friend data
+        Object.keys(data.friendCodes||{}).forEach(code=>{
+            if(code===myCode)return;
+            fbDb.ref('users/'+code).on('value',snap=>{
+                const remote=snap.val();
+                if(remote&&remote.friends&&remote.friends[1]){
+                    const fid=data.friendCodes[code];
+                    if(fid){
+                        const oldData=JSON.stringify(data.friends[fid]);
+                        data.friends[fid]={...remote.friends[1],code:code};
+                        const newData=JSON.stringify(data.friends[fid]);
+                        if(oldData!==newData){saveData(data);renderAll()}
+                        // Check for new notifications
+                        if(remote.notifications){
+                            const myNotifs=data.notifications||[];
+                            Object.values(remote.notifications).forEach(n=>{
+                                if(n.to===myCode&&!myNotifs.find(x=>x.id===n.id)){
+                                    if(!data.notifications)data.notifications=[];
+                                    data.notifications.push(n);
+                                    showNotif(n.title,n.message);
+                                    saveData(data);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        });
+    }
+    function connectFriendSync(friendCode){
+        if(!syncEnabled||!fbDb)return;
+        return fbDb.ref('users/'+friendCode).once('value').then(snap=>{
+            const remote=snap.val();
+            if(remote&&remote.friends&&remote.friends[1]){
+                const fid=data.friendCodes[friendCode];
+                if(fid){
+                    data.friends[fid]={...remote.friends[1],code:friendCode};
+                    saveData(data);renderAll();
+                    return remote.friends[1].name;
+                }
+            }
+            return null;
+        });
+    }
+    function pushNotificationToFriends(type,title,message){
+        if(!syncEnabled||!fbDb)return;
+        const myCode=data.friends[1].myCode;
+        if(!myCode)return;
+        const notif={id:Date.now(),from:myCode,fromName:data.friends[1].name,type,title,message,time:new Date().toISOString()};
+        Object.keys(data.friendCodes||{}).forEach(code=>{
+            if(code===myCode)return;
+            fbDb.ref('users/'+code+'/notifications/'+notif.id).set({...notif,to:code});
+        });
+    }
+
+    // ===== FIREBASE SETUP WIZARD =====
+    function saveFirebaseSetup(){
+        const apiKey=document.getElementById('fbApiKey').value.trim();
+        const authDomain=document.getElementById('fbAuthDomain').value.trim();
+        const databaseURL=document.getElementById('fbDatabaseURL').value.trim();
+        const projectId=document.getElementById('fbProjectId').value.trim();
+        const storageBucket=document.getElementById('fbStorageBucket').value.trim();
+        const appId=document.getElementById('fbAppId').value.trim();
+        if(!apiKey||!databaseURL||!projectId){document.getElementById('fbSetupStatus').innerHTML='<span style="color:var(--danger)">Please fill API Key, Database URL, and Project ID</span>';return}
+        const cfg={apiKey,authDomain,databaseURL,projectId,storageBucket,appId};
+        saveFirebaseConfig(cfg);
+        document.getElementById('fbSetupStatus').innerHTML='<span style="color:var(--success)">Saved! Reconnecting...</span>';
+        setTimeout(()=>{location.reload()},1000);
+    }
+    function loadFirebaseConfigIntoForm(){
+        const cfg=loadFirebaseConfig();
+        if(cfg){
+            document.getElementById('fbApiKey').value=cfg.apiKey||'';
+            document.getElementById('fbAuthDomain').value=cfg.authDomain||'';
+            document.getElementById('fbDatabaseURL').value=cfg.databaseURL||'';
+            document.getElementById('fbProjectId').value=cfg.projectId||'';
+            document.getElementById('fbStorageBucket').value=cfg.storageBucket||'';
+            document.getElementById('fbAppId').value=cfg.appId||'';
+        }
+    }
+    function renderNotifications(){
+        const el=document.getElementById('notifList');
+        const notifs=(data.notifications||[]).slice().reverse().slice(0,20);
+        if(!notifs.length){el.innerHTML='<div class="empty"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></div>';return}
+        const icons={target:'🎯',goal:'🏅',activity:'📋',streak:'🔥',badge:'🏆'};
+        el.innerHTML=notifs.map(n=>{
+            const t=new Date(n.time);
+            const timeStr=t.toLocaleDateString([],{month:'short',day:'numeric'})+' '+t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+            return'<div class="ai"><div class="aic" style="background:rgba(253,203,110,.2)">'+(icons[n.type]||'🔔')+'</div><div class="ainf"><h4>'+esc(n.title)+'</h4><p>'+esc(n.message)+'</p><p style="font-size:.65rem;color:var(--muted)">'+timeStr+'</p></div></div>';
+        }).join('');
+    }
+    function showNotif(title,msg){
+        const t=document.createElement('div');t.className='toast';t.innerHTML='<span>🔔 '+esc(title)+'</span><span style="font-size:.75rem;color:var(--muted)">'+esc(msg)+'</span>';
+        document.body.appendChild(t);setTimeout(()=>t.remove(),6000);
+        if('Notification' in window&&Notification.permission==='granted')new Notification(title,{body:msg});
+    }
 
     function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<6;i++)r+=c.charAt(Math.floor(Math.random()*c.length));return r}
     function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
@@ -554,7 +738,7 @@
     function editFriendName(id){const n=prompt('Enter name:',data.friends[id].name);if(n&&n.trim()){data.friends[id].name=n.trim();saveData(data);renderFriendToggle();renderAll()}}
 
     // Modal
-    function openModal(t){document.getElementById(t+'Modal').classList.add('act')}
+    function openModal(t){document.getElementById(t+'Modal').classList.add('act');if(t==='notif')renderNotifications();if(t==='fbSetup')loadFirebaseConfigIntoForm()}
     function closeModal(t){document.getElementById(t+'Modal').classList.remove('act')}
     document.querySelectorAll('.mo').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('act')})});
 
@@ -577,6 +761,7 @@
         updateStreak(currentFriend);addXP(10);saveData(data);
         document.getElementById('activityDesc').value='';document.getElementById('activityDuration').value='';
         closeModal('activity');playSound('start');renderAll();
+        pushNotificationToFriends('activity','📋 Activity Logged',data.friends[1].name+' logged '+type+': '+desc+' ('+Math.round(dur/60*10)/10+'h)');
     }
     function deleteActivity(id){
         const a=data.friends[currentFriend].activities.find(x=>x.id===id);
@@ -616,6 +801,7 @@
         if(!title||!target)return alert('Fill all fields');
         data.friends[currentFriend].goals.push({id:Date.now(),title,emoji,target,unit,current:0});
         saveData(data);document.getElementById('goalTitle').value='';document.getElementById('goalTarget').value='';closeModal('goal');renderAll();
+        pushNotificationToFriends('goal','🎯 New Goal',data.friends[1].name+' set a goal: '+emoji+' '+title+' ('+target+' '+unit+')');
     }
     function deleteGoal(id){pushUndo('goal',{id,friend:currentFriend,data:{...data.friends[currentFriend].goals.find(g=>g.id===id)}});data.friends[currentFriend].goals=data.friends[currentFriend].goals.filter(g=>g.id!==id);saveData(data);renderAll();showUndo('Goal deleted',()=>{data.friends[currentFriend].goals.push(undoStack.pop().data.data);saveData(data);renderAll()})}
     function updateGoalProgress(id,d){const g=data.friends[currentFriend].goals.find(x=>x.id===id);if(g){g.current=Math.max(0,Math.min(g.target,g.current+d));if(g.current>=g.target)addXP(50);saveData(data);renderAll()}}
@@ -782,7 +968,7 @@
     }
 
     // ===== DAILY TARGET =====
-    function setDailyTarget(){const h=parseInt(document.getElementById('targetHours').value);if(!h||h<1)return;data.dailyTarget=h;saveData(data);closeModal('target');renderDailyTarget()}
+    function setDailyTarget(){const h=parseInt(document.getElementById('targetHours').value);if(!h||h<1)return;data.dailyTarget=h;saveData(data);closeModal('target');renderDailyTarget();pushNotificationToFriends('target','🎯 Daily Target Set',data.friends[1].name+' set a target of '+h+' hours/day')}
     function renderDailyTarget(){
         const f=data.friends[currentFriend],today=new Date().toDateString();
         const mins=f.activities.filter(a=>new Date(a.date).toDateString()===today).reduce((s,a)=>s+a.duration,0)+f.sessions.filter(s=>new Date(s.date).toDateString()===today).reduce((s,a)=>s+a.duration/60,0);
@@ -952,6 +1138,10 @@
 
         // Sub-pages
         renderChat();renderMood();renderReminders();renderSchedule();renderDailySummary();renderDailyTarget();renderAnalytics();renderCalendar();renderWeekDots();renderXP();renderBadges();renderDailyChallenges();renderChallenges();renderFriendList();
+        // Notification badge
+        const notifCount=(data.notifications||[]).length;
+        const badge=document.getElementById('notifBadge');
+        if(badge){badge.style.display=notifCount>0?'flex':'none';badge.textContent=notifCount;badge.style.alignItems='center';badge.style.justifyContent='center'}
     }
 
     function renderFriendList(){
@@ -1042,6 +1232,15 @@
         data.friendCodes[code]=newId;saveData(data);
         document.getElementById('addFriendCode').value='';document.getElementById('addFriendName').value='';
         currentFriend=newId;renderFriendToggle();renderAll();
+        if(syncEnabled&&fbDb){
+            connectFriendSync(code).then(fname=>{
+                if(fname){alert('Connected to '+fname+"'s data! You can now see their activities.")}
+                else{alert('Friend added. They need to open the app and generate a code for sync to work.')}
+            });
+            listenFromFirebase();
+        }else{
+            alert('Friend added! Setup Firebase sync to see their data in real-time. Go to Friends page and click "Setup Sync".');
+        }
     }
     function removeFriend(id){if(id===1)return;if(!confirm('Remove?'))return;const code=data.friends[id].code;if(code)delete data.friendCodes[code];delete data.friends[id];saveData(data);currentFriend=1;renderFriendToggle();renderAll()}
 
@@ -1058,7 +1257,8 @@
     // Init
     function init(){
         const ids=Object.keys(data.friends);if(ids.length>0)currentFriend=parseInt(ids[0]);
-        renderFriendToggle();renderAll();requestNotificationPermission();scheduleReminders();
+        renderFriendToggle();renderAll();requestNotificationPermission();scheduleReminders();initFirebase();
+        if(!syncEnabled)updateSyncStatus('error');
     }
     init();
     </script>
