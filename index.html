@@ -493,6 +493,11 @@
         <div class="ma"><button class="btn bc" onclick="closeModal('schedule')">Cancel</button><button class="btn bp" onclick="addSchedule()">Add</button></div>
     </div></div>
 
+    <div class="mo" id="friendProfileModal"><div class="mdl" style="max-width:560px">
+        <div id="friendProfileContent"></div>
+        <div class="ma"><button class="btn bc" onclick="closeModal('friendProfile')">Close</button><button class="btn bp" onclick="switchFriendFromProfile()">Switch to This Friend</button></div>
+    </div></div>
+
     <script>
     let currentFriend=1,currentPage='dashboard',currentSessionType='study',timerInterval=null,timerSeconds=0,isTimerRunning=false,pomodoroMode=false,focusActive=false,calMonth=new Date().getMonth(),calYear=new Date().getFullYear(),undoStack=[];
 
@@ -953,7 +958,74 @@
         const el=document.getElementById('friendsList'),ids=Object.keys(data.friends);
         const colors=['#6c5ce7','#00cec9','#fd79a8','#00b894','#fdcb6e','#e17055'];
         el.innerHTML=ids.map((id,i)=>{const f=data.friends[id],c=colors[i%colors.length],isActive=parseInt(id)===currentFriend,total=f.activities.length+f.sessions.length,isMe=parseInt(id)===1;
-            return'<div class="ai" style="'+(isActive?'border:1px solid '+c+'40;background:'+c+'10':'')+'"><div class="av" style="background:'+c+';width:38px;height:38px;font-size:.8rem">'+f.name.substring(0,2).toUpperCase()+'</div><div class="ainf"><h4>'+f.name+(isMe?' (You)':'')+'</h4><p>'+total+' activities • '+f.streak+' streak • Lv.'+(f.level||1)+'</p>'+(f.code?'<p style="font-size:.65rem;color:var(--primary-light);font-family:monospace">'+f.code+'</p>':'')+'</div><div style="display:flex;gap:4px">'+(!isMe?'<button class="btn bs bsm" onclick="switchFriend('+id+')"><i class="fas fa-eye"></i></button>':'')+(!isMe?'<button class="adel" onclick="removeFriend('+id+')"><i class="fas fa-trash"></i></button>':'')+'</div></div>'}).join('');
+            return'<div class="ai" style="'+(isActive?'border:1px solid '+c+'40;background:'+c+'10':'')+'"><div class="av" style="background:'+c+';width:38px;height:38px;font-size:.8rem">'+f.name.substring(0,2).toUpperCase()+'</div><div class="ainf"><h4>'+f.name+(isMe?' (You)':'')+'</h4><p>'+total+' activities • '+f.streak+' streak • Lv.'+(f.level||1)+'</p>'+(f.code?'<p style="font-size:.65rem;color:var(--primary-light);font-family:monospace">'+f.code+'</p>':'')+'</div><div style="display:flex;gap:4px">'+(!isMe?'<button class="btn bgs bsm" onclick="viewFriendProfile('+id+')"><i class="fas fa-eye"></i> View</button>':'')+(!isMe?'<button class="adel" onclick="removeFriend('+id+')"><i class="fas fa-trash"></i></button>':'')+'</div></div>'}).join('');
+    }
+
+    // Friend profile view
+    let viewingFriendId=null;
+    function viewFriendProfile(id){
+        viewingFriendId=parseInt(id);
+        const f=data.friends[id];if(!f)return;
+        const icons={study:'📚',reading:'📖',coding:'💻',exercise:'🏃',work:'💼',break:'☕',other:'📋'};
+        const totalMin=f.activities.reduce((s,a)=>s+a.duration,0)+f.sessions.reduce((s,a)=>s+a.duration/60,0);
+        const actAll=[...f.activities,...f.sessions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,20);
+        const totalPts=calcPts(f);
+        const totalH=(totalMin/60).toFixed(1);
+
+        let html='<h2 style="margin-bottom:16px"><i class="fas fa-user" style="color:var(--primary)"></i> '+esc(f.name)+'\'s Profile</h2>';
+
+        // Stats row
+        html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">';
+        html+='<div style="text-align:center;padding:12px;background:rgba(108,92,231,.1);border-radius:10px"><div style="font-size:1.3rem;font-weight:700">'+totalH+'h</div><div style="font-size:.7rem;color:var(--muted)">Study Time</div></div>';
+        html+='<div style="text-align:center;padding:12px;background:rgba(253,121,168,.1);border-radius:10px"><div style="font-size:1.3rem;font-weight:700">'+f.streak+'</div><div style="font-size:.7rem;color:var(--muted)">Day Streak</div></div>';
+        html+='<div style="text-align:center;padding:12px;background:rgba(253,203,110,.1);border-radius:10px"><div style="font-size:1.3rem;font-weight:700">'+totalPts+'</div><div style="font-size:.7rem;color:var(--muted)">Points</div></div>';
+        html+='<div style="text-align:center;padding:12px;background:rgba(0,184,148,.1);border-radius:10px"><div style="font-size:1.3rem;font-weight:700">Lv.'+(f.level||1)+'</div><div style="font-size:.7rem;color:var(--muted)">Level</div></div>';
+        html+='</div>';
+
+        // XP bar
+        const lvl=f.level||1,xp=f.xp||0,cur=levels[lvl-1]?levels[lvl-1].req:0,nxt=levels[lvl]?levels[lvl].req:cur+500;
+        const pct=Math.min(100,((xp-cur)/(nxt-cur))*100);
+        html+='<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px"><span>'+(levels[lvl-1]?levels[lvl-1].name:'Legend')+'</span><span>'+xp+' / '+nxt+' XP</span></div><div class="xp-bar"><div class="xp-fill" style="width:'+pct+'%"></div></div></div>';
+
+        // Goals
+        if(f.goals.length){
+            html+='<div style="margin-bottom:16px"><h3 style="font-size:.9rem;margin-bottom:8px"><i class="fas fa-bullseye" style="color:var(--warning)"></i> Goals</h3>';
+            f.goals.forEach(g=>{
+                const p=(g.current/g.target*100).toFixed(0);
+                html+='<div style="padding:8px 12px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px"><span>'+g.emoji+' '+esc(g.title)+'</span><span>'+p+'%</span></div><div class="pb"><div class="pf" style="width:'+p+'%"></div></div></div>';
+            });
+            html+='</div>';
+        }
+
+        // Badges
+        if(f.badges&&f.badges.length){
+            html+='<div style="margin-bottom:16px"><h3 style="font-size:.9rem;margin-bottom:8px"><i class="fas fa-medal" style="color:var(--accent)"></i> Badges</h3><div style="display:flex;gap:6px;flex-wrap:wrap">';
+            f.badges.forEach(bid=>{const b=allBadges.find(x=>x.id===bid);if(b)html+='<div style="padding:6px 10px;background:rgba(253,203,110,.1);border-radius:8px;font-size:.8rem">'+b.icon+' '+b.name+'</div>'});
+            html+='</div></div>';
+        }
+
+        // Recent activities
+        html+='<div><h3 style="font-size:.9rem;margin-bottom:8px"><i class="fas fa-clipboard-list" style="color:var(--secondary)"></i> Recent Activities</h3>';
+        if(actAll.length){
+            html+=actAll.map(a=>{
+                const d=a.duration>=3600?(a.duration/3600).toFixed(1)+'h':Math.round(a.duration/60)+'m';
+                const t=new Date(a.date);
+                const dateStr=t.toLocaleDateString([],{month:'short',day:'numeric'});
+                const timeStr=t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+                return'<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:4px"><span style="font-size:1.1rem">'+(icons[a.type]||'📋')+'</span><div style="flex:1"><div style="font-size:.8rem;font-weight:500">'+esc(a.description||a.type)+'</div><div style="font-size:.7rem;color:var(--muted)">'+dateStr+' '+timeStr+'</div></div><span style="font-size:.8rem;font-weight:600;color:var(--primary-light)">'+d+'</span></div>';
+            }).join('');
+        }else{
+            html+='<div style="text-align:center;padding:16px;color:var(--muted);font-size:.8rem">No activities yet</div>';
+        }
+        html+='</div>';
+
+        document.getElementById('friendProfileContent').innerHTML=html;
+        openModal('friendProfile');
+    }
+
+    function switchFriendFromProfile(){
+        closeModal('friendProfile');
+        if(viewingFriendId){currentFriend=viewingFriendId;renderFriendToggle();showPage('dashboard')}
     }
 
     // Friend code system
