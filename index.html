@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         :root{--primary:#6c5ce7;--primary-light:#a29bfe;--secondary:#00cec9;--accent:#fd79a8;--bg:#0a0a1a;--bg2:#12122a;--bg3:#1a1a3e;--text:#fff;--muted:#8888aa;--success:#00b894;--warning:#fdcb6e;--danger:#e17055}
@@ -182,11 +184,82 @@
         .sched-slot .sdel{background:0 0;border:0;color:var(--muted);cursor:pointer;padding:4px}.sched-slot .sdel:hover{color:var(--danger)}
         @media(max-width:1024px){.grid4{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.goals-grid{grid-template-columns:repeat(2,1fr)}}
         @media(max-width:768px){header{padding:12px 16px}.hc{flex-direction:column;gap:8px}main{padding:16px}.grid4{grid-template-columns:1fr 1fr}.goals-grid{grid-template-columns:1fr}.timer-disp{font-size:3rem}.focus-overlay .ftimer{font-size:5rem}}
+        /* Login Page */
+        .login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+        .login-card{background:var(--bg2);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;border:1px solid rgba(108,92,231,.15);box-shadow:0 20px 60px rgba(0,0,0,.3);animation:fadeIn .5s ease}
+        .login-logo{text-align:center;margin-bottom:28px}
+        .login-logo i{font-size:3rem;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;display:block}
+        .login-logo h1{font-size:1.6rem;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .login-logo p{color:var(--muted);font-size:.85rem;margin-top:4px}
+        .login-tabs{display:flex;gap:0;margin-bottom:24px;background:rgba(255,255,255,.05);border-radius:10px;padding:3px}
+        .login-tabs button{flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;font-size:.85rem;transition:.3s;background:0 0;color:var(--muted)}
+        .login-tabs button.active{background:linear-gradient(135deg,var(--primary),#5a4bd1);color:#fff}
+        .login-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:.8rem}
+        .login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
+        .google-btn{width:100%;padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.05);color:var(--text);font-family:inherit;font-size:.9rem;font-weight:500;cursor:pointer;transition:.3s;display:flex;align-items:center;justify-content:center;gap:10px}
+        .google-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25)}
+        .google-btn img{width:20px;height:20px}
+        .login-forgot{color:var(--primary-light);font-size:.8rem;cursor:pointer;text-align:right;margin-top:-8px;margin-bottom:14px}
+        .login-forgot:hover{text-decoration:underline}
+        .login-error{background:rgba(225,112,85,.15);border:1px solid rgba(225,112,85,.3);border-radius:8px;padding:10px;font-size:.8rem;color:var(--danger);margin-bottom:14px;display:none}
+        .user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;cursor:pointer;transition:.3s}
+        .user-avatar:hover{transform:scale(1.1)}
+        .user-menu{position:relative}
+        .user-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--bg2);border:1px solid rgba(108,92,231,.2);border-radius:12px;padding:8px;min-width:180px;z-index:150;box-shadow:0 10px 40px rgba(0,0,0,.4);animation:modalIn .2s ease}
+        .user-dropdown.show{display:block}
+        .user-dropdown button{width:100%;padding:10px 14px;border:none;background:0 0;color:var(--text);font-family:inherit;font-size:.85rem;cursor:pointer;border-radius:8px;text-align:left;transition:.2s;display:flex;align-items:center;gap:8px}
+        .user-dropdown button:hover{background:rgba(108,92,231,.15)}
+        .user-dropdown .ud-name{font-weight:600;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:4px;padding-bottom:8px;color:var(--primary-light)}
     </style>
 </head>
 <body>
     <div class="bg-anim"><div class="c"></div><div class="c"></div><div class="c"></div></div>
 
+    <!-- Login Page -->
+    <div id="loginPage" class="login-page" style="display:none">
+        <div class="login-card">
+            <div class="login-logo">
+                <i class="fas fa-users"></i>
+                <h1>StudyBuddy</h1>
+                <p>Track, compete, and grow together</p>
+            </div>
+            <div class="login-tabs">
+                <button class="active" onclick="showLoginTab('login')">Sign In</button>
+                <button onclick="showLoginTab('signup')">Sign Up</button>
+            </div>
+            <div id="loginError" class="login-error"></div>
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="fg"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com"></div>
+                <div class="fg"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••" onkeypress="if(event.key==='Enter')doLogin()"></div>
+                <div class="login-forgot" onclick="doResetPass()">Forgot password?</div>
+                <button class="btn bp" onclick="doLogin()" style="width:100%;padding:12px;font-size:.9rem"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+            </div>
+            <!-- Signup Form -->
+            <div id="signupForm" style="display:none">
+                <div class="fg"><label>Name</label><input type="text" id="signupName" placeholder="Your name"></div>
+                <div class="fg"><label>Email</label><input type="email" id="signupEmail" placeholder="you@email.com"></div>
+                <div class="fg"><label>Password</label><input type="password" id="signupPass" placeholder="Min 6 characters" onkeypress="if(event.key==='Enter')doSignup()"></div>
+                <button class="btn bgs" onclick="doSignup()" style="width:100%;padding:12px;font-size:.9rem"><i class="fas fa-user-plus"></i> Create Account</button>
+            </div>
+            <div class="login-divider">or</div>
+            <button class="google-btn" onclick="doGoogleLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with Google</button>
+            <p style="text-align:center;margin-top:20px;font-size:.75rem;color:var(--muted)">Login from any phone. Data syncs instantly.</p>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="login-page" style="display:none">
+        <div style="text-align:center">
+            <div style="font-size:3rem;margin-bottom:16px">📚</div>
+            <div style="font-size:1.1rem;font-weight:600;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent">StudyBuddy</div>
+            <div style="margin-top:16px;width:40px;height:40px;border:3px solid rgba(108,92,231,.2);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:16px auto 0"></div>
+        </div>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+    <!-- Main App -->
+    <div id="mainApp" style="display:none">
     <header>
         <div class="hc">
             <div class="logo"><i class="fas fa-users"></i> StudyBuddy</div>
@@ -205,6 +278,15 @@
                 <button class="theme-btn" onclick="openModal('notif')" title="Notifications" style="position:relative"><i class="fas fa-bell"></i><span id="notifBadge" style="display:none;position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:var(--danger);border-radius:50%;font-size:.55rem;color:#fff"></span></button>
                 <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon" id="themeIcon"></i></button>
                 <div class="ft" id="friendToggle"></div>
+                <div class="user-menu">
+                    <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">?</div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="ud-name" id="udName">User</div>
+                        <div style="font-size:.75rem;color:var(--muted);padding:0 14px 8px" id="udEmail">user@email.com</div>
+                        <button onclick="openModal('fbSetup')"><i class="fas fa-cog"></i> Sync Settings</button>
+                        <button onclick="doLogout()" style="color:var(--danger)"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -423,18 +505,30 @@
                     <div class="ch"><h2><i class="fas fa-user-plus" style="color:var(--primary)"></i> Add Friend</h2></div>
                     <div style="background:rgba(108,92,231,.08);border-radius:10px;padding:16px;margin-bottom:16px">
                         <h3 style="font-size:.9rem;margin-bottom:6px">Your Friend Code</h3>
-                        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">Share this code with your friend:</p>
+                        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">Share this code or QR with your friend:</p>
                         <div style="display:flex;gap:6px;align-items:center">
                             <div id="myCode" style="flex:1;padding:12px;background:rgba(0,0,0,.3);border-radius:8px;font-family:monospace;font-size:1rem;font-weight:700;letter-spacing:2px;color:var(--primary-light);text-align:center;user-select:all">---</div>
                             <button class="btn bp" onclick="copyMyCode()" id="copyCodeBtn"><i class="fas fa-copy"></i></button>
                         </div>
-                        <button class="btn bs" onclick="generateMyCode()" style="width:100%;margin-top:8px"><i class="fas fa-sync-alt"></i> Generate Code</button>
+                        <div id="qrContainer" style="text-align:center;margin-top:12px;display:none">
+                            <div style="background:#fff;border-radius:12px;padding:12px;display:inline-block">
+                                <img id="qrImage" style="width:160px;height:160px" alt="QR Code">
+                            </div>
+                            <p style="font-size:.7rem;color:var(--muted);margin-top:6px">Scan this QR code to add me</p>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px">
+                            <button class="btn bs" onclick="generateMyCode()" style="flex:1"><i class="fas fa-sync-alt"></i> Generate Code</button>
+                            <button class="btn bs" onclick="toggleQR()" id="qrToggleBtn" style="flex:1"><i class="fas fa-qrcode"></i> Show QR</button>
+                        </div>
                     </div>
                     <div style="background:rgba(0,206,201,.08);border-radius:10px;padding:16px;margin-bottom:16px">
-                        <h3 style="font-size:.9rem;margin-bottom:6px">Add Friend by Code</h3>
+                        <h3 style="font-size:.9rem;margin-bottom:6px">Add Friend by Code or QR</h3>
                         <div class="fg"><input type="text" id="addFriendCode" placeholder="Enter 6-digit code..." style="font-family:monospace;letter-spacing:1px"></div>
                         <div class="fg"><label>Friend's Name</label><input type="text" id="addFriendName" placeholder="e.g., Rahul"></div>
-                        <button class="btn bgs" onclick="addFriendByCode()" style="width:100%"><i class="fas fa-user-plus"></i> Add Friend</button>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn bgs" onclick="addFriendByCode()" style="flex:1"><i class="fas fa-user-plus"></i> Add</button>
+                            <button class="btn bp" onclick="startQRScan()" style="flex:1"><i class="fas fa-camera"></i> Scan QR</button>
+                        </div>
                     </div>
                     <div style="background:rgba(253,203,110,.08);border-radius:10px;padding:16px">
                         <h3 style="font-size:.9rem;margin-bottom:6px">🔄 Real-Time Sync</h3>
@@ -449,6 +543,7 @@
             </div>
         </div>
     </main>
+    </div><!-- end mainApp -->
 
     <!-- Focus Mode Overlay -->
     <div class="focus-overlay" id="focusOverlay">
@@ -532,6 +627,14 @@
         <div class="ma"><button class="btn bc" onclick="closeModal('notif')">Close</button></div>
     </div></div>
 
+    <div class="mo" id="qrScanModal"><div class="mdl" style="max-width:420px">
+        <h2 style="margin-bottom:12px"><i class="fas fa-camera" style="color:var(--primary)"></i> Scan QR Code</h2>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Point your camera at your friend's QR code</p>
+        <div id="qrReader" style="width:100%;border-radius:12px;overflow:hidden;background:#000;min-height:250px"></div>
+        <p id="qrScanStatus" style="font-size:.8rem;text-align:center;margin-top:10px;color:var(--muted)">Scanning...</p>
+        <div class="ma"><button class="btn bc" onclick="stopQRScan()">Cancel</button></div>
+    </div></div>
+
     <div class="mo" id="friendProfileModal"><div class="mdl" style="max-width:560px">
         <div id="friendProfileContent"></div>
         <div class="ma"><button class="btn bc" onclick="closeModal('friendProfile')">Close</button><button class="btn bp" onclick="switchFriendFromProfile()">Switch to This Friend</button></div>
@@ -557,19 +660,16 @@
 
     function loadData(){
         const s=localStorage.getItem('friendsTracker');
-        if(s){const p=JSON.parse(s);p.friendCodes=p.friendCodes||{};p.messages=p.messages||[];p.reminders=p.reminders||[];p.moods=p.moods||{};p.challenges=p.challenges||[];p.schedule=p.schedule||[];p.dailyTarget=p.dailyTarget||4;return p}
-        return{friends:{1:{name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0}},friendCodes:{},messages:[],reminders:[],moods:{},challenges:[],schedule:[],dailyTarget:4}
+        if(s){const p=JSON.parse(s);p.friendCodes=p.friendCodes||{};p.friendUids=p.friendUids||{};p.messages=p.messages||[];p.reminders=p.reminders||[];p.moods=p.moods||{};p.challenges=p.challenges||[];p.schedule=p.schedule||[];p.dailyTarget=p.dailyTarget||4;return p}
+        return{friends:{1:{name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0}},friendCodes:{},friendUids:{},messages:[],reminders:[],moods:{},challenges:[],schedule:[],dailyTarget:4}
     }
     function saveData(d){localStorage.setItem('friendsTracker',JSON.stringify(d));syncToFirebase()}
     let data=loadData();
 
     // ===== FIREBASE SYNC =====
-    let fbDb=null,syncEnabled=false,myUserId=null;
-    function loadFirebaseConfig(){
-        const s=localStorage.getItem('fbConfig');
-        if(s)try{return JSON.parse(s)}catch(e){}
-        return null;
-    }
+    let fbDb=null,fbAuth=null,syncEnabled=false;
+    let currentUid=null;
+    function loadFirebaseConfig(){const s=localStorage.getItem('fbConfig');if(s)try{return JSON.parse(s)}catch(e){}return null}
     function saveFirebaseConfig(cfg){localStorage.setItem('fbConfig',JSON.stringify(cfg))}
     function initFirebase(){
         try{
@@ -578,60 +678,85 @@
             if(typeof firebase==='undefined')return;
             firebase.initializeApp(cfg);
             fbDb=firebase.database();
+            fbAuth=firebase.auth();
             syncEnabled=true;
-            myUserId=data.myUserId||genCode();
-            if(!data.myUserId){data.myUserId=myUserId;localStorage.setItem('friendsTracker',JSON.stringify(data))}
             console.log('Firebase connected');
-            listenFromFirebase();
             updateSyncStatus('connected');
-        }catch(e){console.log('Firebase init failed:',e);updateSyncStatus('error')}
+            fbAuth.onAuthStateChanged(user=>{
+                if(user){
+                    currentUid=user.uid;
+                    loadUserData(user.uid);
+                }else{
+                    currentUid=null;
+                    showLoginPage();
+                }
+            });
+        }catch(e){console.log('Firebase init failed:',e);updateSyncStatus('error');showLoginPage()}
     }
     function updateSyncStatus(status){
-        const el=document.getElementById('syncStatus');
-        if(!el)return;
-        if(status==='connected'){el.innerHTML='<i class="fas fa-cloud" style="color:var(--success)"></i> Synced';el.title='Firebase connected - data syncs across devices'}
-        else if(status==='syncing'){el.innerHTML='<i class="fas fa-sync fa-spin" style="color:var(--warning)"></i> Syncing...'}
-        else if(status==='error'){el.innerHTML='<i class="fas fa-cloud" style="color:var(--danger)"></i> Offline';el.title='Firebase not configured - click to setup'}
-        else{el.innerHTML='<i class="fas fa-cloud" style="color:var(--muted)"></i> Local';el.title='Local mode - click Friends page to setup sync'}
+        const el=document.getElementById('syncStatus');if(!el)return;
+        if(status==='connected')el.innerHTML='<i class="fas fa-cloud" style="color:var(--success)"></i> Synced';
+        else if(status==='syncing')el.innerHTML='<i class="fas fa-sync fa-spin" style="color:var(--warning)"></i>';
+        else if(status==='error')el.innerHTML='<i class="fas fa-cloud" style="color:var(--danger)"></i> Offline';
+        else el.innerHTML='<i class="fas fa-cloud" style="color:var(--muted)"></i> Local';
     }
+    // Sync using UID
     function syncToFirebase(){
-        if(!syncEnabled||!fbDb)return;
+        if(!syncEnabled||!fbDb||!currentUid)return;
         updateSyncStatus('syncing');
         try{
-            const myCode=data.friends[1].myCode;
-            if(!myCode){updateSyncStatus('error');return}
             const syncData=JSON.parse(JSON.stringify(data));
             syncData.syncTimestamp=Date.now();
-            fbDb.ref('users/'+myCode).set(syncData).then(()=>{
-                updateSyncStatus('connected');
-            }).catch(()=>updateSyncStatus('error'));
-        }catch(e){console.log('Sync failed:',e);updateSyncStatus('error')}
+            fbDb.ref('users/'+currentUid).set(syncData).then(()=>updateSyncStatus('connected')).catch(()=>updateSyncStatus('error'));
+        }catch(e){updateSyncStatus('error')}
+    }
+    function loadUserData(uid){
+        if(!fbDb)return;
+        fbDb.ref('users/'+uid).once('value').then(snap=>{
+            const remote=snap.val();
+            if(remote&&remote.friends){
+                data=remote;
+            }
+            localStorage.setItem('friendsTracker',JSON.stringify(data));
+            const ids=Object.keys(data.friends);if(ids.length>0)currentFriend=parseInt(ids[0]);
+            renderFriendToggle();renderAll();
+            listenFromFirebase();
+        }).catch(()=>{showMainApp()});
     }
     function listenFromFirebase(){
-        if(!syncEnabled||!fbDb)return;
-        const myCode=data.friends[1].myCode;
-        if(!myCode)return;
-        // Listen for friend data
-        Object.keys(data.friendCodes||{}).forEach(code=>{
-            if(code===myCode)return;
-            fbDb.ref('users/'+code).on('value',snap=>{
+        if(!fbDb||!currentUid)return;
+        // Listen for own data changes
+        fbDb.ref('users/'+currentUid).on('value',snap=>{
+            const remote=snap.val();
+            if(remote&&remote.friends){
+                const oldTs=data.syncTimestamp||0;
+                if(remote.syncTimestamp>oldTs){
+                    data=remote;
+                    localStorage.setItem('friendsTracker',JSON.stringify(data));
+                    const ids=Object.keys(data.friends);if(ids.length>0)currentFriend=parseInt(ids[0]);
+                    renderFriendToggle();renderAll();
+                }
+            }
+        });
+        // Listen for friend data (by friend's UID stored in friendCodes)
+        Object.keys(data.friendUids||{}).forEach(friendUid=>{
+            if(friendUid===currentUid)return;
+            fbDb.ref('users/'+friendUid).on('value',snap=>{
                 const remote=snap.val();
                 if(remote&&remote.friends&&remote.friends[1]){
-                    const fid=data.friendCodes[code];
+                    const fid=data.friendUids[friendUid];
                     if(fid){
-                        const oldData=JSON.stringify(data.friends[fid]);
-                        data.friends[fid]={...remote.friends[1],code:code};
-                        const newData=JSON.stringify(data.friends[fid]);
-                        if(oldData!==newData){saveData(data);renderAll()}
-                        // Check for new notifications
+                        data.friends[fid]={...remote.friends[1],uid:friendUid};
+                        localStorage.setItem('friendsTracker',JSON.stringify(data));
+                        renderAll();
+                        // Check notifications
                         if(remote.notifications){
-                            const myNotifs=data.notifications||[];
                             Object.values(remote.notifications).forEach(n=>{
-                                if(n.to===myCode&&!myNotifs.find(x=>x.id===n.id)){
+                                if(n.to===currentUid&&!(data.notifications||[]).find(x=>x.id===n.id)){
                                     if(!data.notifications)data.notifications=[];
                                     data.notifications.push(n);
                                     showNotif(n.title,n.message);
-                                    saveData(data);
+                                    localStorage.setItem('friendsTracker',JSON.stringify(data));
                                 }
                             });
                         }
@@ -640,30 +765,116 @@
             });
         });
     }
-    function connectFriendSync(friendCode){
-        if(!syncEnabled||!fbDb)return;
-        return fbDb.ref('users/'+friendCode).once('value').then(snap=>{
+    function connectFriendByUid(friendUid){
+        if(!fbDb)return Promise.resolve(null);
+        return fbDb.ref('users/'+friendUid).once('value').then(snap=>{
             const remote=snap.val();
-            if(remote&&remote.friends&&remote.friends[1]){
-                const fid=data.friendCodes[friendCode];
-                if(fid){
-                    data.friends[fid]={...remote.friends[1],code:friendCode};
-                    saveData(data);renderAll();
-                    return remote.friends[1].name;
-                }
-            }
+            if(remote&&remote.friends&&remote.friends[1])return remote.friends[1].name;
             return null;
         });
     }
     function pushNotificationToFriends(type,title,message){
-        if(!syncEnabled||!fbDb)return;
-        const myCode=data.friends[1].myCode;
-        if(!myCode)return;
-        const notif={id:Date.now(),from:myCode,fromName:data.friends[1].name,type,title,message,time:new Date().toISOString()};
-        Object.keys(data.friendCodes||{}).forEach(code=>{
-            if(code===myCode)return;
-            fbDb.ref('users/'+code+'/notifications/'+notif.id).set({...notif,to:code});
+        if(!syncEnabled||!fbDb||!currentUid)return;
+        const notif={id:Date.now(),from:currentUid,fromName:data.friends[1].name,type,title,message,time:new Date().toISOString()};
+        Object.keys(data.friendUids||{}).forEach(friendUid=>{
+            if(friendUid===currentUid)return;
+            fbDb.ref('users/'+friendUid+'/notifications/'+notif.id).set({...notif,to:friendUid});
         });
+    }
+
+    // ===== AUTH FUNCTIONS =====
+    function showLoginPage(){
+        document.getElementById('loginPage').style.display='flex';
+        document.getElementById('mainApp').style.display='none';
+        document.getElementById('loadingScreen').style.display='none';
+    }
+    function showMainApp(){
+        document.getElementById('loginPage').style.display='none';
+        document.getElementById('mainApp').style.display='block';
+        document.getElementById('loadingScreen').style.display='none';
+        const ids=Object.keys(data.friends);if(ids.length>0)currentFriend=parseInt(ids[0]);
+        renderFriendToggle();renderAll();requestNotificationPermission();scheduleReminders();
+    }
+    function showLoading(){document.getElementById('loginPage').style.display='none';document.getElementById('mainApp').style.display='none';document.getElementById('loadingScreen').style.display='flex'}
+    function showLoginTab(tab){
+        document.querySelectorAll('.login-tabs button').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.login-tabs button')[tab==='login'?0:1].classList.add('active');
+        document.getElementById('loginForm').style.display=tab==='login'?'block':'none';
+        document.getElementById('signupForm').style.display=tab==='signup'?'block':'none';
+        document.getElementById('loginError').style.display='none';
+    }
+    function showAuthError(msg){const e=document.getElementById('loginError');e.textContent=msg;e.style.display='block'}
+    function clearAuthError(){document.getElementById('loginError').style.display='none'}
+
+    async function doLogin(){
+        clearAuthError();
+        const email=document.getElementById('loginEmail').value.trim();
+        const pass=document.getElementById('loginPass').value;
+        if(!email||!pass)return showAuthError('Fill all fields');
+        showLoading();
+        try{
+            if(!fbAuth){initFirebase();if(!fbAuth){showLoginPage();return showAuthError('Setup Firebase first (Friends page)')}}
+            await fbAuth.signInWithEmailAndPassword(email,pass);
+            showMainApp();
+        }catch(e){showLoginPage();showAuthError(e.message.replace('Firebase: ','').replace(/\(auth\/.*\)\.?/,''))}
+    }
+    async function doSignup(){
+        clearAuthError();
+        const name=document.getElementById('signupName').value.trim();
+        const email=document.getElementById('signupEmail').value.trim();
+        const pass=document.getElementById('signupPass').value;
+        if(!name||!email||!pass)return showAuthError('Fill all fields');
+        if(pass.length<6)return showAuthError('Password must be 6+ characters');
+        showLoading();
+        try{
+            if(!fbAuth){initFirebase();if(!fbAuth){showLoginPage();return showAuthError('Setup Firebase first (Friends page)')}}
+            const cred=await fbAuth.createUserWithEmailAndPassword(email,pass);
+            await cred.user.updateProfile({displayName:name});
+            data.friends[1].name=name;
+            currentUid=cred.user.uid;
+            localStorage.setItem('friendsTracker',JSON.stringify(data));
+            syncToFirebase();
+            showMainApp();
+        }catch(e){showLoginPage();showAuthError(e.message.replace('Firebase: ','').replace(/\(auth\/.*\)\.?/,''))}
+    }
+    async function doGoogleLogin(){
+        clearAuthError();showLoading();
+        try{
+            if(!fbAuth){initFirebase();if(!fbAuth){showLoginPage();return showAuthError('Setup Firebase first (Friends page)')}}
+            const provider=new firebase.auth.GoogleAuthProvider();
+            const cred=await fbAuth.signInWithPopup(provider);
+            if(cred.additionalUserInfo&&cred.additionalUserInfo.isNewUser){
+                data.friends[1].name=cred.user.displayName||'User';
+                currentUid=cred.user.uid;
+                localStorage.setItem('friendsTracker',JSON.stringify(data));
+                syncToFirebase();
+            }
+            showMainApp();
+        }catch(e){showLoginPage();showAuthError(e.message.replace('Firebase: ','').replace(/\(auth\/.*\)\.?/,''))}
+    }
+    async function doResetPass(){
+        const email=document.getElementById('loginEmail').value.trim();
+        if(!email)return showAuthError('Enter your email first');
+        try{if(fbAuth)await fbAuth.sendPasswordResetEmail(email);alert('Reset email sent!')}catch(e){showAuthError(e.message)}
+    }
+    function doLogout(){
+        if(fbAuth)fbAuth.signOut();
+        currentUid=null;
+        localStorage.removeItem('friendsTracker');
+        data=loadData();
+        showLoginPage();
+    }
+    function toggleUserMenu(){
+        const dd=document.getElementById('userDropdown');
+        dd.classList.toggle('show');
+        if(dd.classList.contains('show')){
+            const user=fbAuth?fbAuth.currentUser:null;
+            document.getElementById('udName').textContent=user?(user.displayName||'User'):'User';
+            document.getElementById('udEmail').textContent=user?(user.email||''):'';
+            const av=document.getElementById('userAvatar');
+            av.textContent=user?(user.displayName||user.email||'?')[0].toUpperCase():'?';
+            setTimeout(()=>document.addEventListener('click',function h(e){if(!e.target.closest('.user-menu')){dd.classList.remove('show');document.removeEventListener('click',h)}}),10);
+        }
     }
 
     // ===== FIREBASE SETUP WIZARD =====
@@ -1219,27 +1430,111 @@
     }
 
     // Friend code system
-    function generateMyCode(){const me=data.friends[1];if(!me.myCode)me.myCode=genCode();saveData(data);document.getElementById('myCode').textContent=me.myCode}
+    function generateMyCode(){
+        const me=data.friends[1];
+        if(!me.myCode)me.myCode=genCode();
+        localStorage.setItem('friendsTracker',JSON.stringify(data));
+        document.getElementById('myCode').textContent=me.myCode;
+        // Register code in Firebase so friends can look it up
+        if(syncEnabled&&fbDb&&currentUid){
+            fbDb.ref('friendCodeMap/'+me.myCode).set(currentUid);
+        }
+    }
     function copyMyCode(){let c=data.friends[1].myCode;if(!c){generateMyCode();c=data.friends[1].myCode}navigator.clipboard.writeText(c).then(()=>{const b=document.getElementById('copyCodeBtn');b.innerHTML='<i class="fas fa-check"></i>';setTimeout(()=>b.innerHTML='<i class="fas fa-copy"></i>',1500)})}
+
+    // ===== QR CODE =====
+    let qrVisible=false;
+    function toggleQR(){
+        const c=document.getElementById('qrContainer'),btn=document.getElementById('qrToggleBtn');
+        const code=data.friends[1].myCode;
+        if(!code){alert('Generate a code first!');return}
+        qrVisible=!qrVisible;
+        if(qrVisible){
+            c.style.display='block';
+            btn.innerHTML='<i class="fas fa-eye-slash"></i> Hide QR';
+            document.getElementById('qrImage').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=STUDYBUDDY:'+code+'&color=6c5ce7&bgcolor=ffffff&margin=10';
+        }else{
+            c.style.display='none';
+            btn.innerHTML='<i class="fas fa-qrcode"></i> Show QR';
+        }
+    }
+
+    let html5QrScanner=null;
+    function startQRScan(){
+        openModal('qrScan');
+        document.getElementById('qrScanStatus').textContent='Initializing camera...';
+        if(!document.getElementById('qrReader').querySelector('video')){
+            document.getElementById('qrReader').innerHTML='';
+        }
+        try{
+            html5QrScanner=new Html5Qrcode('qrReader');
+            html5QrScanner.start(
+                {facingMode:'environment'},
+                {fps:10,qrbox:{width:220,height:220}},
+                onQRScanSuccess,
+                ()=>{}
+            ).then(()=>{
+                document.getElementById('qrScanStatus').textContent='Point camera at QR code';
+            }).catch(err=>{
+                document.getElementById('qrScanStatus').textContent='Camera access denied. Type code manually.';
+                console.log('Camera error:',err);
+            });
+        }catch(e){
+            document.getElementById('qrScanStatus').textContent='Scanner not available. Type code manually.';
+            console.log('QR scanner error:',e);
+        }
+    }
+
+    function onQRScanSuccess(decodedText){
+        stopQRScan();
+        let code=decodedText;
+        if(code.startsWith('STUDYBUDDY:'))code=code.replace('STUDYBUDDY:','');
+        code=code.trim().toUpperCase();
+        if(code.length>=4){
+            document.getElementById('addFriendCode').value=code;
+            document.getElementById('qrScanStatus').textContent='Code scanned: '+code;
+            setTimeout(()=>closeModal('qrScan'),500);
+        }else{
+            document.getElementById('qrScanStatus').textContent='Invalid QR code. Try again.';
+        }
+    }
+
+    function stopQRScan(){
+        if(html5QrScanner){
+            html5QrScanner.stop().then(()=>{html5QrScanner.clear();html5QrScanner=null}).catch(()=>{html5QrScanner=null});
+        }
+        closeModal('qrScan');
+    }
     function addFriendByCode(){
         const code=document.getElementById('addFriendCode').value.trim().toUpperCase(),name=document.getElementById('addFriendName').value.trim();
         if(!code||!name)return alert('Fill all fields');
-        if(data.friendCodes[code])return alert('Already added!');
+        if(data.friendCodes&&data.friendCodes[code])return alert('Already added!');
         if(code===data.friends[1].myCode)return alert("Can't add yourself!");
         if(code.length!==6)return alert('Invalid code!');
         const ids=Object.keys(data.friends).map(Number),newId=ids.length?Math.max(...ids)+1:2;
         data.friends[newId]={name,code,activities:[],sessions:[],goals:[],streak:0,lastActive:null,xp:0,level:1,badges:[],streakFreezes:0,addedAt:new Date().toISOString()};
-        data.friendCodes[code]=newId;saveData(data);
+        if(!data.friendCodes)data.friendCodes={};
+        data.friendCodes[code]=newId;
+        if(!data.friendUids)data.friendUids={};
         document.getElementById('addFriendCode').value='';document.getElementById('addFriendName').value='';
-        currentFriend=newId;renderFriendToggle();renderAll();
+        currentFriend=newId;renderFriendToggle();saveData(data);renderAll();
+        // Try to find friend's UID from Firebase
         if(syncEnabled&&fbDb){
-            connectFriendSync(code).then(fname=>{
-                if(fname){alert('Connected to '+fname+"'s data! You can now see their activities.")}
-                else{alert('Friend added. They need to open the app and generate a code for sync to work.')}
-            });
-            listenFromFirebase();
+            fbDb.ref('friendCodeMap/'+code).once('value').then(snap=>{
+                const friendUid=snap.val();
+                if(friendUid){
+                    data.friendUids[friendUid]=newId;
+                    localStorage.setItem('friendsTracker',JSON.stringify(data));
+                    listenFromFirebase();
+                    connectFriendByUid(friendUid).then(fname=>{
+                        if(fname)alert('Connected to '+fname+"'s data!");
+                    });
+                }else{
+                    alert('Friend added. They need to open the app and login for sync to work.');
+                }
+            }).catch(()=>alert('Friend added. Sync will work once both phones are connected.'));
         }else{
-            alert('Friend added! Setup Firebase sync to see their data in real-time. Go to Friends page and click "Setup Sync".');
+            alert('Friend added! Setup Firebase sync to see their data in real-time.');
         }
     }
     function removeFriend(id){if(id===1)return;if(!confirm('Remove?'))return;const code=data.friends[id].code;if(code)delete data.friendCodes[code];delete data.friends[id];saveData(data);currentFriend=1;renderFriendToggle();renderAll()}
@@ -1256,9 +1551,14 @@
 
     // Init
     function init(){
-        const ids=Object.keys(data.friends);if(ids.length>0)currentFriend=parseInt(ids[0]);
-        renderFriendToggle();renderAll();requestNotificationPermission();scheduleReminders();initFirebase();
-        if(!syncEnabled)updateSyncStatus('error');
+        const cfg=loadFirebaseConfig();
+        if(cfg&&cfg.apiKey&&cfg.apiKey.length>20&&typeof firebase!=='undefined'){
+            showLoading();
+            initFirebase();
+        }else{
+            // No Firebase configured — run in local mode
+            showMainApp();
+        }
     }
     init();
     </script>
