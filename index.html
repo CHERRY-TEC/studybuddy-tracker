@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddy Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary:#6c5ce7;--primary-light:#a29bfe;--secondary:#00cec9;--accent:#fd79a8;--bg:#0a0a1a;--bg2:#12122a;--bg3:#1a1a3e;--text:#fff;--muted:#8888aa;--success:#00b894;--warning:#fdcb6e;--danger:#e17055}
+        [data-theme="light"]{--bg:#f0f0f5;--bg2:#fff;--bg3:#e8e8f0;--text:#1a1a2e;--muted:#666}
+        body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+        .bg-anim{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden}
+        .bg-anim .c{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(108,92,231,.1),transparent);animation:fl 20s infinite ease-in-out}
+        .bg-anim .c:nth-child(1){width:600px;height:600px;top:-200px;left:-100px}
+        .bg-anim .c:nth-child(2){width:400px;height:400px;bottom:-100px;right:-100px;background:radial-gradient(circle,rgba(0,206,201,.1),transparent);animation-delay:-5s}
+        .bg-anim .c:nth-child(3){width:300px;height:300px;top:50%;left:50%;background:radial-gradient(circle,rgba(253,121,168,.08),transparent);animation-delay:-10s}
+        @keyframes fl{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(50px,-50px) scale(1.1)}50%{transform:translate(-30px,30px) scale(.9)}75%{transform:translate(40px,40px) scale(1.05)}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes modalIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+        @keyframes confetti{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(-200px) rotate(720deg);opacity:0}}
+        header{background:rgba(18,18,42,.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(108,92,231,.2);padding:12px 30px;position:sticky;top:0;z-index:100}
+        .hc{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+        .logo{display:flex;align-items:center;gap:10px;font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .logo i{-webkit-text-fill-color:var(--primary);font-size:1.5rem}
+        nav{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+        nav button{background:0 0;border:none;color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.8rem;transition:.3s;white-space:nowrap}
+        nav button:hover,nav button.active{background:rgba(108,92,231,.2);color:var(--primary-light)}
+        .ft{display:flex;background:var(--bg2);border-radius:10px;padding:3px;gap:3px}
+        .ft button{padding:6px 14px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:500;transition:.3s;background:0 0;color:var(--muted);font-size:.8rem}
+        .ft button.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+        .hdr-right{display:flex;gap:8px;align-items:center}
+        .theme-btn{background:rgba(255,255,255,.1);border:none;color:var(--text);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1rem}
+        main{max-width:1400px;margin:0 auto;padding:24px 30px}
+        .page{display:none;animation:fadeIn .4s ease}.page.active{display:block}
+        .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+        .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+        .sc{background:var(--bg2);border-radius:14px;padding:20px;border:1px solid rgba(108,92,231,.1);transition:.3s}
+        .sc:hover{transform:translateY(-3px);border-color:rgba(108,92,231,.3);box-shadow:0 8px 30px rgba(108,92,231,.12)}
+        .sc .ic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:12px}
+        .sc .ic.p{background:rgba(108,92,231,.2);color:var(--primary)}.sc .ic.t{background:rgba(0,206,201,.2);color:var(--secondary)}.sc .ic.pk{background:rgba(253,121,168,.2);color:var(--accent)}.sc .ic.g{background:rgba(0,184,148,.2);color:var(--success)}.sc .ic.w{background:rgba(253,203,110,.2);color:var(--warning)}.sc .ic.d{background:rgba(225,112,85,.2);color:var(--danger)}
+        .sc h3{font-size:1.6rem;font-weight:700}.sc p{color:var(--muted);font-size:.8rem;margin-top:2px}
+        .sc .tr{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:.75rem;padding:3px 8px;border-radius:6px}
+        .tr.up{background:rgba(0,184,148,.2);color:var(--success)}.tr.dn{background:rgba(225,112,85,.2);color:var(--danger)}
+        .cd{background:var(--bg2);border-radius:14px;padding:20px;border:1px solid rgba(108,92,231,.1)}
+        .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+        .ch h2{font-size:1rem;font-weight:600}
+        .btn{padding:8px 14px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:500;transition:.3s;display:inline-flex;align-items:center;gap:6px}
+        .bp{background:linear-gradient(135deg,var(--primary),#5a4bd1);color:#fff}.bp:hover{transform:scale(1.03);box-shadow:0 4px 16px rgba(108,92,231,.3)}
+        .bs{background:rgba(108,92,231,.2);color:var(--primary-light)}.bgs{background:linear-gradient(135deg,var(--success),#00a884);color:#fff}
+        .bd{background:linear-gradient(135deg,var(--danger),#d63031);color:#fff}.bwy{background:linear-gradient(135deg,var(--warning),#e17055);color:#fff}
+        .bc{background:rgba(255,255,255,.1);color:var(--muted)}.bsm{padding:5px 10px;font-size:.75rem}
+        .bar-chart{display:flex;align-items:flex-end;justify-content:space-around;height:220px;padding:0 10px;border-bottom:1px solid rgba(255,255,255,.1)}
+        .bw{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+        .bar{width:26px;border-radius:5px 5px 0 0;transition:.5s ease;cursor:pointer;min-height:4px}
+        .bar:hover{opacity:.8}.bar.p{background:linear-gradient(180deg,var(--primary),var(--primary-light))}.bar.t{background:linear-gradient(180deg,var(--secondary),#55efc4)}.bar.pk{background:linear-gradient(180deg,var(--accent),#fab1c4)}
+        .bl{font-size:.7rem;color:var(--muted)}.bv{font-size:.65rem;color:var(--text);font-weight:600}
+        .al{display:flex;flex-direction:column;gap:10px}
+        .ai{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,.03);border-radius:10px;transition:.3s}
+        .ai:hover{background:rgba(108,92,231,.08)}
+        .aic{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+        .ainf{flex:1}.ainf h4{font-size:.85rem;font-weight:500}.ainf p{font-size:.75rem;color:var(--muted)}
+        .at{font-size:.8rem;font-weight:600;color:var(--primary-light)}
+        .adel{background:0 0;border:0;color:var(--muted);cursor:pointer;padding:5px;border-radius:5px;transition:.3s}.adel:hover{color:var(--danger);background:rgba(225,112,85,.15)}
+        .timer-sec{text-align:center;padding:30px 0}
+        .timer-disp{font-size:5rem;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:20px 0;font-variant-numeric:tabular-nums}
+        .timer-ctrls{display:flex;justify-content:center;gap:14px;margin-bottom:24px}
+        .tbtn{width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:.3s}
+        .tbtn.go{background:linear-gradient(135deg,var(--success),#00a884);color:#fff}.tbtn.ps{background:linear-gradient(135deg,var(--warning),#e17055);color:#fff}.tbtn.sp{background:linear-gradient(135deg,var(--danger),#d63031);color:#fff}.tbtn:hover{transform:scale(1.1)}
+        .styp{display:flex;justify-content:center;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+        .styp button{padding:8px 18px;border:2px solid rgba(108,92,231,.3);background:0 0;color:var(--muted);border-radius:10px;cursor:pointer;font-family:inherit;font-weight:500;transition:.3s;font-size:.85rem}
+        .styp button.active,.styp button:hover{border-color:var(--primary);background:rgba(108,92,231,.15);color:var(--primary-light)}
+        .sess-log{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto}
+        .sess-log::-webkit-scrollbar{width:3px}.sess-log::-webkit-scrollbar-track{background:0 0}.sess-log::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px}
+        .se{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid var(--primary)}
+        .se .dur{color:var(--primary-light);font-weight:600}.se .tm{color:var(--muted);font-size:.75rem}
+        .goals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+        .gc{background:var(--bg2);border-radius:14px;padding:20px;border:1px solid rgba(108,92,231,.1);transition:.3s}
+        .gc:hover{border-color:rgba(108,92,231,.3)}
+        .gh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+        .ge{font-size:1.8rem}.gdel{background:0 0;border:0;color:var(--muted);cursor:pointer;padding:3px}.gdel:hover{color:var(--danger)}
+        .gc h3{font-size:.9rem;margin-bottom:10px}
+        .pb{height:7px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-bottom:6px}
+        .pf{height:100%;border-radius:4px;background:linear-gradient(135deg,var(--primary),var(--secondary));transition:width .5s ease}
+        .pt{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+        .lb-item{display:flex;align-items:center;gap:14px;padding:14px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:8px}
+        .lb-item.win{border:1px solid rgba(253,203,110,.3);background:rgba(253,203,110,.04)}
+        .rk{font-size:1.3rem;font-weight:700;width:36px;text-align:center}.rk.g{color:#ffd700}.rk.s{color:#c0c0c0}
+        .av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700}
+        .lbi{flex:1}.lbi h3{font-size:.9rem;font-weight:600}.lbi p{font-size:.75rem;color:var(--muted)}
+        .lbs{font-size:1.2rem;font-weight:700;color:var(--primary-light)}
+        .streak-disp{text-align:center;padding:16px}
+        .streak-num{font-size:3.5rem;font-weight:700;background:linear-gradient(135deg,var(--warning),var(--danger));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .streak-lbl{color:var(--muted);margin-top:6px;font-size:.85rem}
+        .wk-dots{display:flex;justify-content:center;gap:7px;margin-top:16px}
+        .wd{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;background:rgba(255,255,255,.05);color:var(--muted)}
+        .wd.act{background:linear-gradient(135deg,var(--success),#00a884);color:#fff}.wd.today{border:2px solid var(--primary)}
+        .mo{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+        .mo.act{display:flex}
+        .mdl{background:var(--bg2);border-radius:16px;padding:28px;width:90%;max-width:420px;border:1px solid rgba(108,92,231,.2);animation:modalIn .3s ease}
+        .mdl h2{margin-bottom:16px;font-size:1.1rem}
+        .fg{margin-bottom:14px}.fg label{display:block;margin-bottom:5px;font-size:.8rem;color:var(--muted)}
+        .fg input,.fg select{width:100%;padding:10px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--text);font-family:inherit;font-size:.85rem;outline:0;transition:.3s}
+        .fg input:focus,.fg select:focus{border-color:var(--primary)}
+        .fg select option{background:var(--bg2)}
+        .ma{display:flex;gap:8px;margin-top:16px}.ma .btn{flex:1;padding:10px}
+        .empty{text-align:center;padding:30px 16px;color:var(--muted)}.empty i{font-size:2.5rem;margin-bottom:12px;opacity:.4}
+        /* Chat */
+        .chat-box{background:var(--bg2);border-radius:14px;border:1px solid rgba(108,92,231,.1);display:flex;flex-direction:column;height:480px}
+        .chat-hdr{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px}
+        .chat-hdr .od{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+        .chat-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+        .chat-msgs::-webkit-scrollbar{width:3px}.chat-msgs::-webkit-scrollbar-track{background:0 0}.chat-msgs::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px}
+        .cm{max-width:72%;padding:10px 14px;border-radius:14px;font-size:.85rem;line-height:1.4}
+        .cm.sent{align-self:flex-end;background:linear-gradient(135deg,var(--primary),#5a4bd1);color:#fff;border-bottom-right-radius:3px}
+        .cm.rcv{align-self:flex-start;background:rgba(255,255,255,.08);border-bottom-left-radius:3px}
+        .cm .mt{font-size:.65rem;opacity:.6;margin-top:3px;display:block}
+        .cm .ms{font-size:.65rem;font-weight:600;color:var(--secondary);margin-bottom:3px}
+        .cm-reactions{display:flex;gap:4px;margin-top:4px}
+        .cm-reactions button{background:rgba(255,255,255,.1);border:none;border-radius:10px;padding:2px 6px;font-size:.7rem;cursor:pointer}
+        .chat-in{padding:14px 18px;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:8px}
+        .chat-in input{flex:1;padding:10px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--text);font-family:inherit;font-size:.85rem;outline:0}
+        .chat-in input:focus{border-color:var(--primary)}
+        .qr{display:flex;gap:6px;padding:0 18px 10px;flex-wrap:wrap}
+        .qr button{padding:5px 12px;background:rgba(108,92,231,.12);border:1px solid rgba(108,92,231,.2);border-radius:16px;color:var(--primary-light);cursor:pointer;font-size:.75rem;font-family:inherit;transition:.3s}
+        .qr button:hover{background:rgba(108,92,231,.25)}
+        /* Reminder */
+        .rcard{background:var(--bg2);border-radius:14px;padding:16px;border:1px solid rgba(108,92,231,.1);display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:.3s}
+        .rcard:hover{border-color:rgba(108,92,231,.3)}
+        .rcard .ri{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+        .rcard .rinf{flex:1}.rcard .rinf h4{font-size:.85rem;margin-bottom:2px}.rcard .rinf p{font-size:.75rem;color:var(--muted)}
+        .tgl{position:relative;width:44px;height:24px}.tgl input{opacity:0;width:0;height:0}
+        .tgl .sl{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.1);border-radius:24px;cursor:pointer;transition:.3s}
+        .tgl .sl:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+        .tgl input:checked+.sl{background:var(--success)}.tgl input:checked+.sl:before{transform:translateX(20px)}
+        /* Calendar */
+        .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+        .cal-hdr{font-size:.7rem;color:var(--muted);text-align:center;padding:6px 0;font-weight:600}
+        .cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.75rem;cursor:pointer;transition:.3s;position:relative}
+        .cal-day:hover{transform:scale(1.1)}
+        .cal-day.l0{background:rgba(255,255,255,.03)}.cal-day.l1{background:rgba(0,184,148,.2)}.cal-day.l2{background:rgba(0,184,148,.4)}.cal-day.l3{background:rgba(0,184,148,.6)}.cal-day.l4{background:rgba(0,184,148,.85)}
+        .cal-day.today{border:2px solid var(--primary)}.cal-day.empty{opacity:0;pointer-events:none}
+        /* XP Bar */
+        .xp-bar{height:12px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden;margin:8px 0}
+        .xp-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--primary),var(--accent),var(--warning));transition:width .8s ease;background-size:200% 100%;animation:xpShine 2s linear infinite}
+        @keyframes xpShine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        /* Badge */
+        .badge-card{background:var(--bg2);border-radius:12px;padding:16px;border:1px solid rgba(108,92,231,.1);text-align:center;transition:.3s}
+        .badge-card:hover{transform:translateY(-3px);border-color:rgba(108,92,231,.3)}
+        .badge-card.locked{opacity:.4;filter:grayscale(1)}
+        .badge-icon{font-size:2rem;margin-bottom:8px}.badge-card h4{font-size:.8rem;margin-bottom:2px}.badge-card p{font-size:.7rem;color:var(--muted)}
+        /* Challenge */
+        .challenge-card{background:linear-gradient(135deg,rgba(108,92,231,.1),rgba(253,121,168,.1));border-radius:14px;padding:20px;border:1px solid rgba(108,92,231,.2);margin-bottom:12px}
+        .challenge-card h3{font-size:.95rem;margin-bottom:8px}.challenge-card p{font-size:.8rem;color:var(--muted);margin-bottom:12px}
+        .challenge-prog{display:flex;gap:8px;align-items:center}
+        .challenge-prog .bar{flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+        .challenge-prog .fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+        .challenge-prog span{font-size:.75rem;color:var(--muted);white-space:nowrap}
+        /* Focus Mode */
+        .focus-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:500;flex-direction:column;align-items:center;justify-content:center}
+        .focus-overlay.active{display:flex}
+        .focus-overlay .ftimer{font-size:8rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .focus-overlay .ftype{font-size:1.2rem;color:var(--muted);margin-bottom:30px}
+        .focus-overlay .fctrls{display:flex;gap:16px;margin-top:30px}
+        .focus-overlay .fexit{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.1);border:none;color:var(--muted);padding:10px 20px;border-radius:10px;cursor:pointer;font-family:inherit}
+        /* Search */
+        .search-box{position:relative;margin-bottom:16px}
+        .search-box input{width:100%;padding:12px 16px 12px 42px;background:var(--bg2);border:1px solid rgba(108,92,231,.2);border-radius:10px;color:var(--text);font-family:inherit;font-size:.85rem;outline:0}
+        .search-box input:focus{border-color:var(--primary)}
+        .search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
+        /* Undo Toast */
+        .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--primary);border-radius:12px;padding:14px 24px;z-index:300;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,.4);animation:fadeIn .3s}
+        .toast .undo-btn{color:var(--primary-light);font-weight:600;cursor:pointer;text-decoration:underline}
+        /* Schedule */
+        .sched-slot{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:6px}
+        .sched-slot .stime{font-size:.8rem;color:var(--primary-light);font-weight:600;min-width:50px}
+        .sched-slot .stxt{flex:1;font-size:.85rem}
+        .sched-slot .sdel{background:0 0;border:0;color:var(--muted);cursor:pointer;padding:4px}.sched-slot .sdel:hover{color:var(--danger)}
+        @media(max-width:1024px){.grid4{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.goals-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:768px){header{padding:12px 16px}.hc{flex-direction:column;gap:8px}main{padding:16px}.grid4{grid-template-columns:1fr 1fr}.goals-grid{grid-template-columns:1fr}.timer-disp{font-size:3rem}.focus-overlay .ftimer{font-size:5rem}}
+    </style>
+</head>
+<body>
+    <div class="bg-anim"><div class="c"></div><div class="c"></div><div class="c"></div></div>
+
+    <header>
+        <div class="hc">
+            <div class="logo"><i class="fas fa-users"></i> StudyBuddy</div>
+            <nav id="mainNav">
+                <button class="active" onclick="showPage('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</button>
+                <button onclick="showPage('timer')"><i class="fas fa-stopwatch"></i> Timer</button>
+                <button onclick="showPage('goals')"><i class="fas fa-bullseye"></i> Goals</button>
+                <button onclick="showPage('analytics')"><i class="fas fa-chart-bar"></i> Analytics</button>
+                <button onclick="showPage('chat')"><i class="fas fa-comments"></i> Chat</button>
+                <button onclick="showPage('gamification')"><i class="fas fa-gamepad"></i> XP</button>
+                <button onclick="showPage('reminders')"><i class="fas fa-bell"></i> Reminders</button>
+                <button onclick="showPage('friends')"><i class="fas fa-user-plus"></i> Friends</button>
+            </nav>
+            <div class="hdr-right">
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon" id="themeIcon"></i></button>
+                <div class="ft" id="friendToggle"></div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Dashboard -->
+        <div id="dashboard" class="page active">
+            <div class="grid4">
+                <div class="sc"><div class="ic p"><i class="fas fa-book-open"></i></div><h3 id="totalStudy">0h</h3><p>Total Study Time</p><span class="tr up" id="studyTrend"><i class="fas fa-arrow-up"></i> This week</span></div>
+                <div class="sc"><div class="ic t"><i class="fas fa-check-circle"></i></div><h3 id="tasksDone">0</h3><p>Tasks Completed</p><span class="tr up"><i class="fas fa-arrow-up"></i> Keep going!</span></div>
+                <div class="sc"><div class="ic pk"><i class="fas fa-fire"></i></div><h3 id="curStreak">0</h3><p>Day Streak</p><span class="tr up"><i class="fas fa-fire"></i> On fire!</span></div>
+                <div class="sc"><div class="ic g"><i class="fas fa-trophy"></i></div><h3 id="weekPts">0</h3><p>Weekly Points</p><span class="tr up"><i class="fas fa-star"></i> Great!</span></div>
+            </div>
+            <!-- Daily Target -->
+            <div class="cd" style="margin-bottom:20px">
+                <div class="ch"><h2><i class="fas fa-flag" style="color:var(--warning)"></i> Daily Target</h2><button class="btn bs bsm" onclick="openModal('target')">Set Target</button></div>
+                <div style="display:flex;align-items:center;gap:16px">
+                    <div class="pb" style="flex:1;height:10px"><div class="pf" id="dailyTargetBar" style="width:0%"></div></div>
+                    <span id="dailyTargetText" style="font-size:.85rem;font-weight:600;white-space:nowrap">0 / 4h</span>
+                </div>
+            </div>
+            <div class="grid2">
+                <div class="cd">
+                    <div class="ch"><h2>Weekly Activity</h2><button class="btn bp" onclick="openModal('activity')"><i class="fas fa-plus"></i> Log</button></div>
+                    <div class="bar-chart" id="weeklyChart"></div>
+                </div>
+                <div class="cd">
+                    <div class="ch"><h2>Today's Activities</h2><div class="search-box" style="margin:0;flex:1;max-width:200px"><i class="fas fa-search"></i><input type="text" placeholder="Search..." oninput="searchActivities(this.value)"></div></div>
+                    <div class="al" id="activityList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer -->
+        <div id="timer" class="page">
+            <div class="timer-sec">
+                <h2>Study Timer</h2>
+                <div class="styp" id="sessionTypes">
+                    <button class="active" onclick="setSessionType('study',this)">📚 Study</button>
+                    <button onclick="setSessionType('reading',this)">📖 Reading</button>
+                    <button onclick="setSessionType('coding',this)">💻 Coding</button>
+                    <button onclick="setSessionType('exercise',this)">🏃 Exercise</button>
+                    <button onclick="setSessionType('break',this)">☕ Break</button>
+                </div>
+                <div class="timer-disp" id="timerDisplay">00:00:00</div>
+                <div class="timer-ctrls">
+                    <button class="tbtn go" onclick="startTimer()"><i class="fas fa-play"></i></button>
+                    <button class="tbtn ps" onclick="pauseTimer()"><i class="fas fa-pause"></i></button>
+                    <button class="tbtn sp" onclick="stopTimer()"><i class="fas fa-stop"></i></button>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;flex-wrap:wrap">
+                    <button class="btn bs" onclick="startPomodoro()"><i class="fas fa-clock"></i> Pomodoro (25m)</button>
+                    <button class="btn bs" onclick="quickTimer(5)">5m Break</button>
+                    <button class="btn bs" onclick="quickTimer(15)">15m Break</button>
+                    <button class="btn bgs" onclick="enterFocusMode()"><i class="fas fa-expand"></i> Focus Mode</button>
+                </div>
+                <div class="cd"><div class="ch"><h2>Today's Sessions</h2><span id="todayTotal" style="color:var(--primary-light);font-weight:600">0h 0m</span></div><div class="sess-log" id="sessionLog"></div></div>
+            </div>
+        </div>
+
+        <!-- Goals -->
+        <div id="goals" class="page">
+            <div class="cd">
+                <div class="ch"><h2>Weekly Goals</h2><button class="btn bp" onclick="openModal('goal')"><i class="fas fa-plus"></i> Add Goal</button></div>
+                <div class="goals-grid" id="goalsGrid"></div>
+            </div>
+            <div class="cd" style="margin-top:16px">
+                <div class="ch"><h2><i class="fas fa-calendar-alt" style="color:var(--secondary)"></i> Study Calendar</h2></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                    <button class="btn bs bsm" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <span id="calMonth" style="font-weight:600"></span>
+                    <button class="btn bs bsm" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="cal-grid" id="calendarGrid"></div>
+                <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;font-size:.7rem;color:var(--muted)">
+                    <span>Less</span>
+                    <div style="width:14px;height:14px;border-radius:3px;background:rgba(0,184,148,.1)"></div>
+                    <div style="width:14px;height:14px;border-radius:3px;background:rgba(0,184,148,.3)"></div>
+                    <div style="width:14px;height:14px;border-radius:3px;background:rgba(0,184,148,.5)"></div>
+                    <div style="width:14px;height:14px;border-radius:3px;background:rgba(0,184,148,.8)"></div>
+                    <span>More</span>
+                </div>
+            </div>
+            <div class="streak-disp cd" style="margin-top:16px">
+                <h2 style="margin-bottom:12px">Current Streak</h2>
+                <div class="streak-num" id="streakBig">0</div>
+                <div class="streak-lbl">consecutive days active</div>
+                <div class="wk-dots" id="weekDots"></div>
+            </div>
+        </div>
+
+        <!-- Analytics -->
+        <div id="analytics" class="page">
+            <div class="grid4">
+                <div class="sc"><div class="ic w"><i class="fas fa-star"></i></div><h3 id="prodScore">0%</h3><p>Productivity Score</p></div>
+                <div class="sc"><div class="ic p"><i class="fas fa-clock"></i></div><h3 id="bestTime">--</h3><p>Best Study Time</p></div>
+                <div class="sc"><div class="ic t"><i class="fas fa-calendar-check"></i></div><h3 id="totalDays">0</h3><p>Active Days</p></div>
+                <div class="sc"><div class="ic pk"><i class="fas fa-chart-line"></i></div><h3 id="avgDaily">0h</h3><p>Avg Daily Hours</p></div>
+            </div>
+            <div class="grid2">
+                <div class="cd">
+                    <div class="ch"><h2><i class="fas fa-chart-pie" style="color:var(--accent)"></i> Subject Breakdown</h2></div>
+                    <div id="subjectChart" style="padding:20px 0"></div>
+                </div>
+                <div class="cd">
+                    <div class="ch"><h2><i class="fas fa-history" style="color:var(--warning)"></i> Leaderboard History</h2></div>
+                    <div class="al" id="leaderHistory"></div>
+                </div>
+            </div>
+            <div class="cd" style="margin-top:16px">
+                <div class="ch"><h2><i class="fas fa-trophy" style="color:var(--warning)"></i> Weekly Leaderboard</h2></div>
+                <div id="leaderboard"></div>
+            </div>
+            <div class="cd" style="margin-top:16px">
+                <div class="ch"><h2><i class="fas fa-medal" style="color:var(--accent)"></i> Achievements</h2></div>
+                <div class="al" id="achievementsList"></div>
+            </div>
+        </div>
+
+        <!-- Chat -->
+        <div id="chat" class="page">
+            <div class="grid2">
+                <div class="chat-box">
+                    <div class="chat-hdr"><div class="od"></div><span style="font-weight:600">Study Chat</span><span style="font-size:.75rem;color:var(--muted);margin-left:auto">All friends can see</span></div>
+                    <div class="chat-msgs" id="chatMessages"></div>
+                    <div class="qr"><button onclick="sendQuickReply('Ready to study? 📚')">Ready?</button><button onclick="sendQuickReply('Let\'s take a break ☕')">Break</button><button onclick="sendQuickReply('Great session! 💪')">Great!</button><button onclick="sendQuickReply('What are you studying?')">Studying?</button><button onclick="sendQuickReply('Good morning! ☀️')">Morning!</button><button onclick="sendQuickReply('Let\'s compete! 🏆')">Compete!</button></div>
+                    <div class="chat-in"><input type="text" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendMessage()"><button class="btn bp" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button></div>
+                </div>
+                <div>
+                    <div class="cd" style="margin-bottom:16px">
+                        <div class="ch"><h2>Study Mood</h2></div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:16px 0">
+                            <button class="btn bs" onclick="setMood('🔥','On Fire!')" style="font-size:1.3rem;padding:10px 16px">🔥</button>
+                            <button class="btn bs" onclick="setMood('💪','Motivated')" style="font-size:1.3rem;padding:10px 16px">💪</button>
+                            <button class="btn bs" onclick="setMood('😐','Okay')" style="font-size:1.3rem;padding:10px 16px">😐</button>
+                            <button class="btn bs" onclick="setMood('😴','Tired')" style="font-size:1.3rem;padding:10px 16px">😴</button>
+                            <button class="btn bs" onclick="setMood('🤯','Confused')" style="font-size:1.3rem;padding:10px 16px">🤯</button>
+                            <button class="btn bs" onclick="setMood('🎯','Focused')" style="font-size:1.3rem;padding:10px 16px">🎯</button>
+                        </div>
+                        <div id="currentMood" style="text-align:center;color:var(--muted);font-size:.85rem">Tap to set mood</div>
+                    </div>
+                    <div class="cd">
+                        <div class="ch"><h2>Export Data</h2></div>
+                        <button class="btn bd" onclick="exportPDF()" style="width:100%;margin-bottom:8px"><i class="fas fa-file-pdf"></i> Download Report</button>
+                        <button class="btn bgs" onclick="exportJSON()" style="width:100%;margin-bottom:8px"><i class="fas fa-file-code"></i> Export JSON</button>
+                        <button class="btn bs" onclick="exportCSV()" style="width:100%"><i class="fas fa-file-csv"></i> Export CSV</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gamification -->
+        <div id="gamification" class="page">
+            <div class="cd" style="margin-bottom:20px">
+                <div class="ch"><h2><i class="fas fa-star" style="color:var(--warning)"></i> Level & XP</h2></div>
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">
+                    <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800" id="levelBadge">1</div>
+                    <div style="flex:1"><div style="font-size:1.1rem;font-weight:600" id="levelText">Level 1 - Beginner</div><div style="font-size:.8rem;color:var(--muted)" id="xpText">0 / 100 XP</div><div class="xp-bar"><div class="xp-fill" id="xpBar" style="width:0%"></div></div></div>
+                </div>
+            </div>
+            <div class="cd" style="margin-bottom:20px">
+                <div class="ch"><h2><i class="fas fa-fire" style="color:var(--danger)"></i> Daily Challenges</h2></div>
+                <div id="dailyChallenges" class="al"></div>
+            </div>
+            <div class="cd" style="margin-bottom:20px">
+                <div class="ch"><h2><i class="fas fa-trophy" style="color:var(--warning)"></i> Challenge a Friend</h2><button class="btn bp" onclick="openModal('challenge')"><i class="fas fa-plus"></i> New Challenge</button></div>
+                <div id="challengesList" class="al"></div>
+            </div>
+            <div class="cd">
+                <div class="ch"><h2><i class="fas fa-medal" style="color:var(--accent)"></i> Badges</h2></div>
+                <div class="goals-grid" id="badgesGrid" style="grid-template-columns:repeat(5,1fr)"></div>
+            </div>
+            <div class="cd" style="margin-top:16px">
+                <div class="ch"><h2><i class="fas fa-snowflake" style="color:var(--secondary)"></i> Streak Freeze</h2></div>
+                <div style="display:flex;align-items:center;gap:16px">
+                    <div style="font-size:2rem" id="freezeIcon">🧊</div>
+                    <div style="flex:1"><p style="font-size:.85rem">Protect your streak once per week</p><p style="font-size:.8rem;color:var(--muted)" id="freezeCount">0 freezes used this week</p></div>
+                    <button class="btn bs" onclick="useStreakFreeze()">Use Freeze</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reminders -->
+        <div id="reminders" class="page">
+            <div class="grid2">
+                <div class="cd">
+                    <div class="ch"><h2><i class="fas fa-bell" style="color:var(--warning)"></i> Study Reminders</h2><button class="btn bp" onclick="openModal('reminder')"><i class="fas fa-plus"></i> Add</button></div>
+                    <div id="remindersList"></div>
+                </div>
+                <div>
+                    <div class="cd" style="margin-bottom:16px">
+                        <div class="ch"><h2><i class="fas fa-clock" style="color:var(--primary)"></i> Quick Timers</h2></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                            <button class="btn bs" onclick="quickTimer(25)" style="padding:14px;text-align:center"><div style="font-size:1.3rem;font-weight:700">25</div><div style="font-size:.7rem">Pomodoro</div></button>
+                            <button class="btn bs" onclick="quickTimer(5)" style="padding:14px;text-align:center"><div style="font-size:1.3rem;font-weight:700">5</div><div style="font-size:.7rem">Short Break</div></button>
+                            <button class="btn bs" onclick="quickTimer(15)" style="padding:14px;text-align:center"><div style="font-size:1.3rem;font-weight:700">15</div><div style="font-size:.7rem">Long Break</div></button>
+                            <button class="btn bs" onclick="quickTimer(50)" style="padding:14px;text-align:center"><div style="font-size:1.3rem;font-weight:700">50</div><div style="font-size:.7rem">Deep Work</div></button>
+                        </div>
+                    </div>
+                    <div class="cd">
+                        <div class="ch"><h2><i class="fas fa-calendar-day" style="color:var(--secondary)"></i> Daily Summary</h2></div>
+                        <div id="dailySummary"></div>
+                    </div>
+                    <div class="cd" style="margin-top:16px">
+                        <div class="ch"><h2><i class="fas fa-calendar" style="color:var(--accent)"></i> Schedule</h2><button class="btn bp bsm" onclick="openModal('schedule')"><i class="fas fa-plus"></i></button></div>
+                        <div id="scheduleList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Friends -->
+        <div id="friends" class="page">
+            <div class="grid2">
+                <div class="cd">
+                    <div class="ch"><h2><i class="fas fa-user-plus" style="color:var(--primary)"></i> Add Friend</h2></div>
+                    <div style="background:rgba(108,92,231,.08);border-radius:10px;padding:16px;margin-bottom:16px">
+                        <h3 style="font-size:.9rem;margin-bottom:6px">Your Friend Code</h3>
+                        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">Share this code with your friend:</p>
+                        <div style="display:flex;gap:6px;align-items:center">
+                            <div id="myCode" style="flex:1;padding:12px;background:rgba(0,0,0,.3);border-radius:8px;font-family:monospace;font-size:1rem;font-weight:700;letter-spacing:2px;color:var(--primary-light);text-align:center;user-select:all">---</div>
+                            <button class="btn bp" onclick="copyMyCode()" id="copyCodeBtn"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <button class="btn bs" onclick="generateMyCode()" style="width:100%;margin-top:8px"><i class="fas fa-sync-alt"></i> Generate Code</button>
+                    </div>
+                    <div style="background:rgba(0,206,201,.08);border-radius:10px;padding:16px">
+                        <h3 style="font-size:.9rem;margin-bottom:6px">Add Friend by Code</h3>
+                        <div class="fg"><input type="text" id="addFriendCode" placeholder="Enter 6-digit code..." style="font-family:monospace;letter-spacing:1px"></div>
+                        <div class="fg"><label>Friend's Name</label><input type="text" id="addFriendName" placeholder="e.g., Rahul"></div>
+                        <button class="btn bgs" onclick="addFriendByCode()" style="width:100%"><i class="fas fa-user-plus"></i> Add Friend</button>
+                    </div>
+                </div>
+                <div class="cd">
+                    <div class="ch"><h2><i class="fas fa-users" style="color:var(--secondary)"></i> Your Friends</h2></div>
+                    <div id="friendsList" class="al"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Focus Mode Overlay -->
+    <div class="focus-overlay" id="focusOverlay">
+        <button class="fexit" onclick="exitFocusMode()"><i class="fas fa-times"></i> Exit Focus</button>
+        <div class="ftype" id="focusType">Study Session</div>
+        <div class="ftimer" id="focusTimer">25:00</div>
+        <div class="fctrls">
+            <button class="tbtn go" onclick="startTimer()"><i class="fas fa-play"></i></button>
+            <button class="tbtn ps" onclick="pauseTimer()"><i class="fas fa-pause"></i></button>
+            <button class="tbtn sp" onclick="stopTimer();exitFocusMode()"><i class="fas fa-stop"></i></button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="mo" id="activityModal"><div class="mdl"><h2>Log Activity</h2>
+        <div class="fg"><label>Type</label><select id="activityType"><option value="study">📚 Study</option><option value="reading">📖 Reading</option><option value="coding">💻 Coding</option><option value="exercise">🏃 Exercise</option><option value="work">💼 Work</option><option value="other">📋 Other</option></select></div>
+        <div class="fg"><label>Description</label><input type="text" id="activityDesc" placeholder="What did you do?"></div>
+        <div class="fg"><label>Duration (minutes)</label><input type="number" id="activityDuration" placeholder="60" min="1"></div>
+        <div class="ma"><button class="btn bc" onclick="closeModal('activity')">Cancel</button><button class="btn bp" onclick="addActivity()">Log Activity</button></div>
+    </div></div>
+
+    <div class="mo" id="goalModal"><div class="mdl"><h2>New Goal</h2>
+        <div class="fg"><label>Title</label><input type="text" id="goalTitle" placeholder="e.g., Study 5 hours"></div>
+        <div class="fg"><label>Emoji</label><input type="text" id="goalEmoji" placeholder="🎯" maxlength="2"></div>
+        <div class="fg"><label>Target</label><input type="number" id="goalTarget" placeholder="30" min="1"></div>
+        <div class="fg"><label>Unit</label><select id="goalUnit"><option value="hours">Hours</option><option value="sessions">Sessions</option><option value="days">Days</option><option value="tasks">Tasks</option></select></div>
+        <div class="ma"><button class="btn bc" onclick="closeModal('goal')">Cancel</button><button class="btn bp" onclick="addGoal()">Create</button></div>
+    </div></div>
+
+    <div class="mo" id="reminderModal"><div class="mdl"><h2>New Reminder</h2>
+        <div class="fg"><label>Title</label><input type="text" id="reminderTitle" placeholder="e.g., Study Math"></div>
+        <div class="fg"><label>Time</label><input type="time" id="reminderTime" value="09:00"></div>
+        <div class="fg"><label>Repeat</label><select id="reminderRepeat"><option value="daily">Every Day</option><option value="weekdays">Weekdays</option><option value="weekends">Weekends</option><option value="once">Once</option></select></div>
+        <div class="ma"><button class="btn bc" onclick="closeModal('reminder')">Cancel</button><button class="btn bp" onclick="addReminder()">Set Reminder</button></div>
+    </div></div>
+
+    <div class="mo" id="targetModal"><div class="mdl"><h2>Set Daily Target</h2>
+        <div class="fg"><label>Hours per day</label><input type="number" id="targetHours" placeholder="4" min="1" max="16"></div>
+        <div class="ma"><button class="btn bc" onclick="closeModal('target')">Cancel</button><button class="btn bp" onclick="setDailyTarget()">Set Target</button></div>
+    </div></div>
+
+    <div class="mo" id="challengeModal"><div class="mdl"><h2>Challenge a Friend</h2>
+        <div class="fg"><label>Challenge Type</label><select id="challengeType"><option value="hours">Most Study Hours</option><option value="sessions">Most Sessions</option><option value="streak">Longest Streak</option><option value="points">Most Points</option></select></div>
+        <div class="fg"><label>Duration</label><select id="challengeDuration"><option value="7">1 Week</option><option value="14">2 Weeks</option><option value="30">1 Month</option></select></div>
+        <div class="ma"><button class="btn bc" onclick="closeModal('challenge')">Cancel</button><button class="btn bp" onclick="createChallenge()">Start Challenge</button></div>
+    </div></div>
+
+    <div class="mo" id="scheduleModal"><div class="mdl"><h2>Add Schedule Slot</h2>
+        <div class="fg"><label>Time</label><input type="time" id="schedTime" value="09:00"></div>
+        <div class="fg"><label>Activity</label><input type="text" id="schedActivity" placeholder="e.g., Math Study"></div>
+        <div class="ma"><button class="btn bc" onclick="closeModal('schedule')">Cancel</button><button class="btn bp" onclick="addSchedule()">Add</button></div>
+    </div></div>
+
+    <script>
+    let currentFriend=1,currentPage='dashboard',currentSessionType='study',timerInterval=null,timerSeconds=0,isTimerRunning=false,pomodoroMode=false,focusActive=false,calMonth=new Date().getMonth(),calYear=new Date().getFullYear(),undoStack=[];
+
+    // Audio context for sounds
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    let audioCtx;
+    function playSound(type){
+        try{
+        if(!audioCtx)audioCtx=new AudioCtx();
+        const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+        o.connect(g);g.connect(audioCtx.destination);
+        if(type==='start'){o.frequency.value=520;o.type='sine';g.gain.value=0.1;o.start();o.stop(audioCtx.currentTime+0.1)}
+        else if(type==='stop'){o.frequency.value=300;o.type='square';g.gain.value=0.08;o.start();o.stop(audioCtx.currentTime+0.15)}
+        else if(type==='done'){o.frequency.value=880;o.type='sine';g.gain.value=0.12;o.start();o.stop(audioCtx.currentTime+0.3)}
+        else if(type==='levelup'){o.frequency.value=660;o.type='sine';g.gain.value=0.1;o.start();setTimeout(()=>{o.frequency.value=880},150);o.stop(audioCtx.currentTime+0.3)}
+        }catch(e){}
+    }
+
+    function loadData(){
+        const s=localStorage.getItem('friendsTracker');
+        if(s){const p=JSON.parse(s);p.friendCodes=p.friendCodes||{};p.messages=p.messages||[];p.reminders=p.reminders||[];p.moods=p.moods||{};p.challenges=p.challenges||[];p.schedule=p.schedule||[];p.dailyTarget=p.dailyTarget||4;return p}
+        return{friends:{1:{name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0}},friendCodes:{},messages:[],reminders:[],moods:{},challenges:[],schedule:[],dailyTarget:4}
+    }
+    function saveData(d){localStorage.setItem('friendsTracker',JSON.stringify(d))}
+    let data=loadData();
+
+    function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<6;i++)r+=c.charAt(Math.floor(Math.random()*c.length));return r}
+    function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+    function getWeekAgo(){return Date.now()-7*86400000}
+    function calcPts(f){return f.activities.filter(a=>new Date(a.date).getTime()>getWeekAgo()).reduce((s,a)=>s+a.points,0)+f.sessions.filter(a=>new Date(a.date).getTime()>getWeekAgo()).reduce((s,a)=>s+a.points,0)}
+
+    // Theme
+    function toggleTheme(){
+        const t=document.documentElement.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme',t==='light'?'dark':'light');
+        document.getElementById('themeIcon').className=t==='light'?'fas fa-moon':'fas fa-sun';
+        localStorage.setItem('theme',t==='light'?'dark':'light');
+    }
+    (function(){const t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);if(t==='light')document.getElementById('themeIcon').className='fas fa-sun'}})();
+
+    // Navigation
+    function showPage(p){
+        document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+        const el=document.getElementById(p);if(el)el.classList.add('active');
+        document.querySelectorAll('nav button').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+p+"'"))b.classList.add('active')});
+        currentPage=p;renderAll();
+    }
+    function switchFriend(id){currentFriend=parseInt(id);renderFriendToggle();renderAll()}
+    function renderFriendToggle(){
+        const c=document.getElementById('friendToggle');
+        c.innerHTML=Object.keys(data.friends).map(id=>{const f=data.friends[id];return'<button class="'+(parseInt(id)===currentFriend?'active':'')+'" onclick="switchFriend('+id+')" ondblclick="editFriendName('+id+')">'+f.name+'</button>'}).join('');
+    }
+    function editFriendName(id){const n=prompt('Enter name:',data.friends[id].name);if(n&&n.trim()){data.friends[id].name=n.trim();saveData(data);renderFriendToggle();renderAll()}}
+
+    // Modal
+    function openModal(t){document.getElementById(t+'Modal').classList.add('act')}
+    function closeModal(t){document.getElementById(t+'Modal').classList.remove('act')}
+    document.querySelectorAll('.mo').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('act')})});
+
+    // Undo system
+    function pushUndo(type,undoData){undoStack.push({type,data:undoData,time:Date.now()});setTimeout(()=>{if(undoStack.length>0&&Date.now()-undoStack[0].time>8000)undoStack.shift()},8000)}
+    function showUndo(msg,cb){
+        const t=document.createElement('div');t.className='toast';t.innerHTML='<span>'+msg+'</span><span class="undo-btn" onclick="this.parentElement.remove()">Undo</span>';
+        document.body.appendChild(t);
+        t.querySelector('.undo-btn').onclick=()=>{cb();t.remove()};
+        setTimeout(()=>t.remove(),8000);
+    }
+
+    // ===== ACTIVITIES =====
+    function addActivity(){
+        const type=document.getElementById('activityType').value,desc=document.getElementById('activityDesc').value,dur=parseInt(document.getElementById('activityDuration').value);
+        if(!desc||!dur)return alert('Fill all fields');
+        const a={id:Date.now(),type,description:desc,duration:dur,date:new Date().toISOString(),points:Math.floor(dur/5)*10};
+        data.friends[currentFriend].activities.push(a);
+        data.friends[currentFriend].lastActive=new Date().toISOString();
+        updateStreak(currentFriend);addXP(10);saveData(data);
+        document.getElementById('activityDesc').value='';document.getElementById('activityDuration').value='';
+        closeModal('activity');playSound('start');renderAll();
+    }
+    function deleteActivity(id){
+        const a=data.friends[currentFriend].activities.find(x=>x.id===id);
+        pushUndo('activity',{id,friend:currentFriend});
+        data.friends[currentFriend].activities=data.friends[currentFriend].activities.filter(x=>x.id!==id);
+        saveData(data);renderAll();
+        showUndo('Activity deleted',()=>{data.friends[currentFriend].activities.push(a);saveData(data);renderAll()});
+    }
+    function searchActivities(q){
+        const items=document.querySelectorAll('#activityList .ai');
+        items.forEach(i=>{i.style.display=i.textContent.toLowerCase().includes(q.toLowerCase())?'flex':'none'});
+    }
+
+    // ===== TIMER =====
+    function setSessionType(t,btn){currentSessionType=t;document.querySelectorAll('.styp button').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+    function startTimer(){if(isTimerRunning)return;isTimerRunning=true;timerInterval=setInterval(()=>{timerSeconds++;updateTimerDisplay();updateFocusDisplay()},1000);playSound('start')}
+    function pauseTimer(){isTimerRunning=false;clearInterval(timerInterval)}
+    function stopTimer(){
+        if(timerSeconds===0)return;pauseTimer();
+        data.friends[currentFriend].sessions.push({id:Date.now(),type:currentSessionType,duration:timerSeconds,date:new Date().toISOString(),points:Math.floor(timerSeconds/300)*25});
+        data.friends[currentFriend].lastActive=new Date().toISOString();
+        updateStreak(currentFriend);addXP(Math.floor(timerSeconds/60)*2);saveData(data);
+        timerSeconds=0;updateTimerDisplay();playSound('done');
+        if(pomodoroMode){pomodoroMode=false;alert('Pomodoro complete! Take a 5 min break.')}
+        renderAll();
+    }
+    function updateTimerDisplay(){const h=Math.floor(timerSeconds/3600),m=Math.floor((timerSeconds%3600)/60),s=timerSeconds%60;document.getElementById('timerDisplay').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+    function updateFocusDisplay(){const m=Math.floor(timerSeconds/60),s=timerSeconds%60;document.getElementById('focusTimer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+    function startPomodoro(){pomodoroMode=true;currentSessionType='study';timerSeconds=25*60;updateTimerDisplay();startTimer()}
+    function quickTimer(m){currentSessionType='study';timerSeconds=m*60;updateTimerDisplay();startTimer();showPage('timer');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.querySelectorAll('nav button').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'timer'"))b.classList.add('active')})}
+    function enterFocusMode(){focusActive=true;document.getElementById('focusOverlay').classList.add('active');document.getElementById('focusType').textContent=currentSessionType.charAt(0).toUpperCase()+currentSessionType.slice(1)+' Session'}
+    function exitFocusMode(){focusActive=false;document.getElementById('focusOverlay').classList.remove('active')}
+
+    // ===== GOALS =====
+    function addGoal(){
+        const title=document.getElementById('goalTitle').value,emoji=document.getElementById('goalEmoji').value||'🎯',target=parseInt(document.getElementById('goalTarget').value),unit=document.getElementById('goalUnit').value;
+        if(!title||!target)return alert('Fill all fields');
+        data.friends[currentFriend].goals.push({id:Date.now(),title,emoji,target,unit,current:0});
+        saveData(data);document.getElementById('goalTitle').value='';document.getElementById('goalTarget').value='';closeModal('goal');renderAll();
+    }
+    function deleteGoal(id){pushUndo('goal',{id,friend:currentFriend,data:{...data.friends[currentFriend].goals.find(g=>g.id===id)}});data.friends[currentFriend].goals=data.friends[currentFriend].goals.filter(g=>g.id!==id);saveData(data);renderAll();showUndo('Goal deleted',()=>{data.friends[currentFriend].goals.push(undoStack.pop().data.data);saveData(data);renderAll()})}
+    function updateGoalProgress(id,d){const g=data.friends[currentFriend].goals.find(x=>x.id===id);if(g){g.current=Math.max(0,Math.min(g.target,g.current+d));if(g.current>=g.target)addXP(50);saveData(data);renderAll()}}
+
+    // ===== STREAK =====
+    function updateStreak(fn){
+        const f=data.friends[fn],today=new Date().toDateString(),la=f.lastActive?new Date(f.lastActive).toDateString():null;
+        if(la!==today){const y=new Date(Date.now()-86400000).toDateString();if(la===y)f.streak++;else if(la!==today)f.streak=1}
+    }
+
+    // ===== XP & LEVELS =====
+    const levels=[{name:'Beginner',req:0},{name:'Learner',req:100},{name:'Student',req:300},{name:'Scholar',req:600},{name:'Expert',req:1000},{name:'Master',req:1500},{name:'Guru',req:2500},{name:'Legend',req:4000},{name:'Champion',req:6000},{name:'Titan',req:10000}];
+    function addXP(pts){
+        const f=data.friends[currentFriend];f.xp=(f.xp||0)+pts;
+        let leveled=false;
+        while(f.level<levels.length && f.xp>=levels[f.level].req){f.level++;leveled=true}
+        if(leveled){playSound('levelup');setTimeout(()=>alert('Level Up! You are now Level '+f.level+' - '+levels[f.level-1].name+'!'),50)}
+        saveData(data);
+    }
+    function renderXP(){
+        const f=data.friends[currentFriend],lvl=f.level||1,xp=f.xp||0;
+        const cur=levels[lvl-1]?levels[lvl-1].req:0,nxt=levels[lvl]?levels[lvl].req:cur+500;
+        const pct=Math.min(100,((xp-cur)/(nxt-cur))*100);
+        document.getElementById('levelBadge').textContent=lvl;
+        document.getElementById('levelText').textContent='Level '+lvl+' - '+(levels[lvl-1]?levels[lvl-1].name:'Legend');
+        document.getElementById('xpText').textContent=xp+' / '+nxt+' XP';
+        document.getElementById('xpBar').style.width=pct+'%';
+    }
+
+    // ===== BADGES =====
+    const allBadges=[
+        {id:'first_activity',icon:'🌟',name:'First Step',desc:'Log your first activity'},
+        {id:'streak_3',icon:'🔥',name:'On Fire',desc:'3 day streak'},
+        {id:'streak_7',icon:'🌋',name:'Unstoppable',desc:'7 day streak'},
+        {id:'streak_30',icon:'💎',name:'Diamond',desc:'30 day streak'},
+        {id:'hours_10',icon:'⏰',name:'Time Keeper',desc:'10 hours studied'},
+        {id:'hours_50',icon:'📚',name:'Bookworm',desc:'50 hours studied'},
+        {id:'hours_100',icon:'🏆',name:'Century',desc:'100 hours studied'},
+        {id:'goals_5',icon:'🎯',name:'Goal Crusher',desc:'Complete 5 goals'},
+        {id:'sessions_20',icon:'⏱️',name:'Dedicated',desc:'20 timer sessions'},
+        {id:'chat_10',icon:'💬',name:'Social Butterfly',desc:'Send 10 messages'},
+    ];
+    function checkBadges(){
+        const f=data.friends[currentFriend];
+        if(!f.badges)f.badges=[];
+        const add=(id)=>{if(!f.badges.includes(id)){f.badges.push(id);playSound('levelup');saveData(data)}};
+        if(f.activities.length>=1)add('first_activity');
+        if(f.streak>=3)add('streak_3');
+        if(f.streak>=7)add('streak_7');
+        if(f.streak>=30)add('streak_30');
+        const totalH=f.activities.reduce((s,a)=>s+a.duration,0)/3600+f.sessions.reduce((s,a)=>s+a.duration,0)/3600;
+        if(totalH>=10)add('hours_10');if(totalH>=50)add('hours_50');if(totalH>=100)add('hours_100');
+        if(f.goals.filter(g=>g.current>=g.target).length>=5)add('goals_5');
+        if(f.sessions.length>=20)add('sessions_20');
+        if((data.messages||[]).filter(m=>m.senderId===currentFriend).length>=10)add('chat_10');
+    }
+    function renderBadges(){
+        const f=data.friends[currentFriend],grid=document.getElementById('badgesGrid');
+        grid.innerHTML=allBadges.map(b=>'<div class="badge-card '+(f.badges&&f.badges.includes(b.id)?'':'locked')+'"><div class="badge-icon">'+b.icon+'</div><h4>'+b.name+'</h4><p>'+b.desc+'</p></div>').join('');
+    }
+
+    // ===== DAILY CHALLENGES =====
+    function renderDailyChallenges(){
+        const f=data.friends[currentFriend],today=new Date().toDateString();
+        const challenges=[
+            {id:'dc1',name:'Study 2 Hours',target:120,current:f.activities.filter(a=>new Date(a.date).toDateString()===today).reduce((s,a)=>s+a.duration,0),unit:'min',xp:30},
+            {id:'dc2',name:'Complete 3 Tasks',target:3,current:f.activities.filter(a=>new Date(a.date).toDateString()===today).length,unit:'tasks',xp:20},
+            {id:'dc3',name:'1 Timer Session',target:1,current:f.sessions.filter(s=>new Date(s.date).toDateString()===today).length,unit:'sessions',xp:15},
+        ];
+        document.getElementById('dailyChallenges').innerHTML=challenges.map(c=>{
+            const pct=Math.min(100,(c.current/c.target)*100);
+            const done=c.current>=c.target;
+            return'<div class="ai" style="opacity:'+(done?'.5':'1')+'"><div class="aic" style="background:'+(done?'rgba(0,184,148,.2)':'rgba(253,203,110,.2)')+'">'+(done?'✅':'⚡')+'</div><div class="ainf"><h4>'+c.name+'</h4><div class="pb" style="margin-top:4px"><div class="pf" style="width:'+pct+'%"></div></div><p>'+Math.min(c.current,c.target)+' / '+c.target+' '+c.unit+' • +'+c.xp+' XP</p></div></div>';
+        }).join('');
+    }
+
+    // ===== CHALLENGES =====
+    function createChallenge(){
+        const type=document.getElementById('challengeType').value,dur=parseInt(document.getElementById('challengeDuration').value);
+        const f2=Object.keys(data.friends).find(id=>parseInt(id)!==currentFriend);
+        if(!f2)return alert('Add a friend first!');
+        data.challenges.push({id:Date.now(),type,duration:dur,friend1:currentFriend,friend2:parseInt(f2),startDate:new Date().toISOString(),status:'active'});
+        saveData(data);closeModal('challenge');renderChallenges();
+    }
+    function renderChallenges(){
+        const el=document.getElementById('challengesList');
+        const active=(data.challenges||[]).filter(c=>c.status==='active');
+        if(!active.length){el.innerHTML='<div class="empty"><i class="fas fa-trophy"></i><p>No active challenges. Start one!</p></div>';return}
+        el.innerHTML=active.map(c=>{
+            const f1=data.friends[c.friend1],f2=data.friends[c.friend2];
+            const p1=calcPts(f1),p2=calcPts(f2);
+            return'<div class="challenge-card"><h3>🏆 '+c.type.charAt(0).toUpperCase()+c.type.slice(1)+' Challenge</h3><p>'+f1.name+' vs '+f2.name+' • '+c.duration+' days</p><div class="challenge-prog"><span>'+f1.name+': '+p1+'</span><div class="bar"><div class="fill" style="width:'+Math.min(100,p1/(p1+p2||1)*100)+'%"></div></div><span>'+p2+': '+f2.name+'</span></div></div>';
+        }).join('');
+    }
+
+    // ===== CHAT =====
+    function sendMessage(){
+        const input=document.getElementById('chatInput'),text=input.value.trim();if(!text)return;
+        const me=data.friends[currentFriend];
+        if(!data.messages)data.messages=[];
+        data.messages.push({id:Date.now(),sender:me.name,senderId:currentFriend,text,time:new Date().toISOString(),reactions:[]});
+        saveData(data);input.value='';checkBadges();renderChat();
+    }
+    function sendQuickReply(t){document.getElementById('chatInput').value=t;sendMessage()}
+    function addReaction(msgId,emoji){
+        const msg=data.messages.find(m=>m.id===msgId);
+        if(msg){if(!msg.reactions)msg.reactions=[];const existing=msg.reactions.find(r=>r.emoji===emoji&&r.userId===currentFriend);
+        if(existing)msg.reactions=msg.reactions.filter(r=>!(r.emoji===emoji&&r.userId===currentFriend));
+        else msg.reactions.push({emoji,userId:currentFriend});saveData(data);renderChat()}
+    }
+    function renderChat(){
+        const c=document.getElementById('chatMessages');
+        if(!data.messages||!data.messages.length){c.innerHTML='<div class="empty"><i class="fas fa-comments"></i><p>Start chatting!</p></div>';return}
+        const reacts=['👍','❤️','😂','🔥','💯'];
+        c.innerHTML=data.messages.map(m=>{
+            const isMine=m.senderId===currentFriend;
+            const time=new Date(m.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+            const rHtml=m.reactions&&m.reactions.length?'<div class="cm-reactions">'+m.reactions.map(r=>'<button onclick="addReaction('+m.id+',\''+r.emoji+'\')">'+r.emoji+' '+m.reactions.filter(x=>x.emoji===r.emoji).length+'</button>').join('')+'</div>':'';
+            const reactBtns='<div class="cm-reactions" style="margin-top:4px">'+reacts.map(r=>'<button onclick="addReaction('+m.id+',\''+r+'\')" style="font-size:.6rem;padding:1px 4px">'+r+'</button>').join('')+'</div>';
+            return'<div class="cm '+(isMine?'sent':'rcv')+'">'+(!isMine?'<span class="ms">'+m.sender+'</span>':'')+'<div>'+esc(m.text)+'</div><span class="mt">'+time+'</span>'+rHtml+reactBtns+'</div>';
+        }).join('');
+        c.scrollTop=c.scrollHeight;
+    }
+
+    // ===== MOOD =====
+    function setMood(e,l){if(!data.moods)data.moods={};data.moods[currentFriend]={emoji:e,label:l,date:new Date().toISOString()};saveData(data);renderMood()}
+    function renderMood(){if(!data.moods||!data.moods[currentFriend])return;const m=data.moods[currentFriend];if(new Date(m.date).toDateString()===new Date().toDateString())document.getElementById('currentMood').innerHTML='<span style="font-size:1.8rem">'+m.emoji+'</span> '+m.label}
+
+    // ===== REMINDERS =====
+    function addReminder(){
+        const title=document.getElementById('reminderTitle').value,time=document.getElementById('reminderTime').value,repeat=document.getElementById('reminderRepeat').value;
+        if(!title||!time)return alert('Fill all fields');
+        if(!data.reminders)data.reminders=[];
+        data.reminders.push({id:Date.now(),title,time,repeat,enabled:true,createdAt:new Date().toISOString()});
+        saveData(data);document.getElementById('reminderTitle').value='';closeModal('reminder');renderReminders();scheduleReminders();requestNotificationPermission();
+    }
+    function toggleReminder(id){const r=data.reminders.find(x=>x.id===id);if(r){r.enabled=!r.enabled;saveData(data);renderReminders();scheduleReminders()}}
+    function deleteReminder(id){data.reminders=data.reminders.filter(r=>r.id!==id);saveData(data);renderReminders()}
+    function renderReminders(){
+        const el=document.getElementById('remindersList');
+        if(!data.reminders||!data.reminders.length){el.innerHTML='<div class="empty"><i class="fas fa-bell-slash"></i><p>No reminders yet</p></div>';return}
+        const rl={daily:'Every Day',weekdays:'Weekdays',weekends:'Weekends',once:'Once'};
+        el.innerHTML=data.reminders.map(r=>'<div class="rcard" style="opacity:'+(r.enabled?1:.5)+'"><div class="ri" style="background:rgba(253,203,110,.2)">🔔</div><div class="rinf"><h4>'+esc(r.title)+'</h4><p>'+r.time+' • '+rl[r.repeat]+'</p></div><label class="tgl"><input type="checkbox" '+(r.enabled?'checked':'')+' onchange="toggleReminder('+r.id+')"><span class="sl"></span></label><button class="adel" onclick="deleteReminder('+r.id+')"><i class="fas fa-trash"></i></button></div>').join('');
+    }
+    function scheduleReminders(){if(!data.reminders)return;data.reminders.forEach(r=>{if(!r.enabled)return;const[h,m]=r.time.split(':').map(Number);const now=new Date(),tgt=new Date();tgt.setHours(h,m,0,0);if(tgt<=now)tgt.setDate(tgt.getDate()+1);setTimeout(()=>{if(r.enabled){showNotif(r.title,r.time);if(r.repeat==='once'){r.enabled=false;saveData(data);renderReminders()}}},tgt-now)})}
+    function showNotif(title,time){
+        if('Notification' in window&&Notification.permission==='granted')new Notification('StudyBuddy',{body:title+' at '+time});
+        const t=document.createElement('div');t.className='toast';t.innerHTML='<span>🔔 '+esc(title)+' - '+time+'</span>';document.body.appendChild(t);setTimeout(()=>t.remove(),5000);
+    }
+    function requestNotificationPermission(){if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}
+
+    // ===== SCHEDULE =====
+    function addSchedule(){
+        const time=document.getElementById('schedTime').value,act=document.getElementById('schedActivity').value;
+        if(!time||!act)return alert('Fill all fields');
+        if(!data.schedule)data.schedule=[];
+        data.schedule.push({id:Date.now(),time,activity:act});saveData(data);closeModal('schedule');renderSchedule();
+    }
+    function deleteSchedule(id){data.schedule=data.schedule.filter(s=>s.id!==id);saveData(data);renderSchedule()}
+    function renderSchedule(){
+        const el=document.getElementById('scheduleList');
+        if(!data.schedule||!data.schedule.length){el.innerHTML='<div class="empty"><i class="fas fa-calendar"></i><p>No schedule yet</p></div>';return}
+        el.innerHTML=data.schedule.sort((a,b)=>a.time.localeCompare(b.time)).map(s=>'<div class="sched-slot"><span class="stime">'+s.time+'</span><span class="stxt">'+esc(s.activity)+'</span><button class="sdel" onclick="deleteSchedule('+s.id+')"><i class="fas fa-times"></i></button></div>').join('');
+    }
+
+    // ===== DAILY TARGET =====
+    function setDailyTarget(){const h=parseInt(document.getElementById('targetHours').value);if(!h||h<1)return;data.dailyTarget=h;saveData(data);closeModal('target');renderDailyTarget()}
+    function renderDailyTarget(){
+        const f=data.friends[currentFriend],today=new Date().toDateString();
+        const mins=f.activities.filter(a=>new Date(a.date).toDateString()===today).reduce((s,a)=>s+a.duration,0)+f.sessions.filter(s=>new Date(s.date).toDateString()===today).reduce((s,a)=>s+a.duration/60,0);
+        const hrs=mins/60,target=data.dailyTarget||4,pct=Math.min(100,(hrs/target)*100);
+        document.getElementById('dailyTargetBar').style.width=pct+'%';
+        document.getElementById('dailyTargetText').textContent=hrs.toFixed(1)+' / '+target+'h';
+    }
+
+    // ===== ANALYTICS =====
+    function renderAnalytics(){
+        const f=data.friends[currentFriend];
+        // Productivity score
+        const days=7,active=f.activities.filter(a=>new Date(a.date).getTime()>getWeekAgo()).length+f.sessions.filter(s=>new Date(s.date).getTime()>getWeekAgo()).length;
+        const prod=Math.min(100,Math.round((active/(days*2))*100));
+        document.getElementById('prodScore').textContent=prod+'%';
+        // Best time
+        const hours={};
+        f.activities.forEach(a=>{const h=new Date(a.date).getHours();hours[h]=(hours[h]||0)+a.duration});
+        const best=Object.entries(hours).sort((a,b)=>b[1]-a[1])[0];
+        document.getElementById('bestTime').textContent=best?String(best[0]).padStart(2,'0')+':00':'--';
+        // Active days
+        const actDays=new Set([...f.activities,...f.sessions].map(a=>new Date(a.date).toDateString()));
+        document.getElementById('totalDays').textContent=actDays.size;
+        // Avg daily
+        const totalH=(f.activities.reduce((s,a)=>s+a.duration,0)+f.sessions.reduce((s,a)=>s+a.duration,0)/60)/60;
+        document.getElementById('avgDaily').textContent=(totalH/7).toFixed(1)+'h';
+        // Subject breakdown
+        const subjects={};
+        f.activities.forEach(a=>{subjects[a.type]=(subjects[a.type]||0)+a.duration});
+        f.sessions.forEach(s=>{subjects[s.type]=(subjects[s.type]||0)+s.duration/60*60});
+        const total=Object.values(subjects).reduce((s,v)=>s+v,0)||1;
+        const icons={study:'📚',reading:'📖',coding:'💻',exercise:'🏃',work:'💼',break:'☕',other:'📋'};
+        const colors={study:'var(--primary)',reading:'var(--secondary)',coding:'var(--accent)',exercise:'var(--success)',work:'var(--warning)',break:'#81ecec',other:'var(--muted)'};
+        document.getElementById('subjectChart').innerHTML=Object.entries(subjects).sort((a,b)=>b[1]-a[1]).map(([t,v])=>{
+            const pct=(v/total*100).toFixed(0);
+            return'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:1.2rem;width:28px">'+(icons[t]||'📋')+'</span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:2px"><span>'+t.charAt(0).toUpperCase()+t.slice(1)+'</span><span>'+pct+'%</span></div><div class="pb"><div class="pf" style="width:'+pct+'%;background:'+colors[t]+'"></div></div></div></div>';
+        }).join('')||'<div class="empty"><p>No data yet</p></div>';
+        // Leaderboard history
+        const hist= document.getElementById('leaderHistory');
+        const weeks=['This Week','Last Week','2 Weeks Ago'];
+        hist.innerHTML=weeks.map((w,i)=>{
+            const wkPts=calcPts(f)-Math.floor(Math.random()*50*i);
+            return'<div class="ai"><div class="aic" style="background:rgba(253,203,110,.2)">'+['🥇','🥈','🥉'][i]+'</div><div class="ainf"><h4>'+w+'</h4><p>'+wkPts+' points</p></div></div>';
+        }).join('');
+        // Leaderboard
+        const ids=Object.keys(data.friends);
+        if(ids.length>=2){
+            const sorted=ids.map(id=>({id,pts:calcPts(data.friends[id]),name:data.friends[id].name})).sort((a,b)=>b.pts-a.pts);
+            document.getElementById('leaderboard').innerHTML=sorted.map((p,i)=>'<div class="lb-item '+(i===0?'win':'')+'"><div class="rk '+(i===0?'g':'s')+'">'+(i+1)+'</div><div class="av" style="background:linear-gradient(135deg,'+(i===0?'var(--primary),var(--primary-light)':'var(--secondary),#55efc4')+')">'+p.name.substring(0,2).toUpperCase()+'</div><div class="lbi"><h3>'+p.name+'</h3><p>'+p.pts+' points</p></div><div class="lbs">'+p.pts+' pts</div></div>').join('');
+        }
+        // Achievements
+        const achList=document.getElementById('achievementsList');
+        const ach=[];
+        if(f.streak>=3)ach.push({icon:'🔥',title:'Hot Streak',desc:'3+ day streak'});
+        if(f.sessions.length>=10)ach.push({icon:'⏱️',title:'Time Master',desc:'10+ sessions'});
+        if(calcPts(f)>=100)ach.push({icon:'🏆',title:'Century Club',desc:'100+ points'});
+        if(f.goals.some(g=>g.current>=g.target))ach.push({icon:'🎯',title:'Goal Crusher',desc:'Completed a goal'});
+        achList.innerHTML=ach.length?ach.map(a=>'<div class="ai"><div class="aic" style="background:rgba(253,203,110,.2)">'+a.icon+'</div><div class="ainf"><h4>'+a.title+'</h4><p>'+a.desc+'</p></div></div>').join(''):'<div class="empty"><p>Keep going!</p></div>';
+    }
+
+    // ===== CALENDAR =====
+    function renderCalendar(){
+        const grid=document.getElementById('calendarGrid');
+        const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+        document.getElementById('calMonth').textContent=months[calMonth]+' '+calYear;
+        const firstDay=new Date(calYear,calMonth,1).getDay();
+        const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+        const f=data.friends[currentFriend];
+        const days={};
+        f.activities.forEach(a=>{const d=new Date(a.date);if(d.getMonth()===calMonth&&d.getFullYear()===calYear){const day=d.getDate();days[day]=(days[day]||0)+a.duration}});
+        f.sessions.forEach(s=>{const d=new Date(s.date);if(d.getMonth()===calMonth&&d.getFullYear()===calYear){const day=d.getDate();days[day]=(days[day]||0)+s.duration/60}});
+        const maxMin=Math.max(...Object.values(days),1);
+        let html=['S','M','T','W','T','F','S'].map(d=>'<div class="cal-hdr">'+d+'</div>').join('');
+        for(let i=0;i<firstDay;i++)html+='<div class="cal-day empty"></div>';
+        const today=new Date();
+        for(let d=1;d<=daysInMonth;d++){
+            const mins=days[d]||0;
+            const lvl=mins===0?0:mins<30?1:mins<60?2:mins<120?3:4;
+            const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+            html+='<div class="cal-day l'+lvl+(isToday?' today':'')+'" title="'+mins+' min">'+d+'</div>';
+        }
+        grid.innerHTML=html;
+    }
+    function changeMonth(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--}renderCalendar()}
+
+    // ===== WEEK DOTS =====
+    function renderWeekDots(){
+        const dots=document.getElementById('weekDots'),names=['S','M','T','W','T','F','S'],today=new Date().getDay(),f=data.friends[currentFriend],la=f.lastActive?new Date(f.lastActive):null;
+        dots.innerHTML=names.map((n,i)=>{let c='wd';if(i===today)c+=' today';if(la&&la.getDay()===i)c+=' act';return'<div class="'+c+'">'+n+'</div>'}).join('');
+    }
+
+    // ===== DAILY SUMMARY =====
+    function renderDailySummary(){
+        const el=document.getElementById('dailySummary');if(!el)return;
+        const f=data.friends[currentFriend],today=new Date().toDateString();
+        const ta=f.activities.filter(a=>new Date(a.date).toDateString()===today),ts=f.sessions.filter(s=>new Date(s.date).toDateString()===today);
+        const totalMin=ta.reduce((s,a)=>s+a.duration,0)+ts.reduce((s,a)=>s+a.duration/60,0);
+        const icons={study:'📚',reading:'📖',coding:'💻',exercise:'🏃',work:'💼',break:'☕',other:'📋'};
+        let html='<div style="margin-bottom:10px"><strong>Total: </strong>'+(totalMin/60).toFixed(1)+' hours</div>';
+        const st={};ta.forEach(a=>{st[a.type]=(st[a.type]||0)+a.duration});ts.forEach(s=>{st[s.type]=(st[s.type]||0)+s.duration/60});
+        if(Object.keys(st).length)html+=Object.entries(st).map(([t,m])=>{const p=totalMin>0?(m/totalMin*100).toFixed(0):0;return'<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:.8rem"><span>'+(icons[t]||'📋')+' '+t+'</span><span>'+(m/60).toFixed(1)+'h ('+p+'%)</span></div><div class="pb" style="margin-top:3px"><div class="pf" style="width:'+p+'%"></div></div></div>'}).join('');
+        else html+='<p style="color:var(--muted);font-size:.8rem">No activities yet today</p>';
+        el.innerHTML=html;
+    }
+
+    // ===== EXPORT =====
+    function exportPDF(){
+        const f=data.friends[currentFriend];
+        let c='WEEKLY ACTIVITY REPORT\n========================\n\nName: '+f.name+'\nDate: '+new Date().toLocaleDateString()+'\nStreak: '+f.streak+' days\nLevel: '+(f.level||1)+'\nXP: '+(f.xp||0)+'\n\n--- ACTIVITIES ---\n';
+        f.activities.forEach(a=>{c+=new Date(a.date).toLocaleDateString()+' | '+a.type+' | '+a.description+' | '+Math.round(a.duration/60)+'m\n'});
+        c+='\n--- SESSIONS ---\n';f.sessions.forEach(s=>{const h=Math.floor(s.duration/3600),m=Math.floor((s.duration%3600)/60);c+=new Date(s.date).toLocaleDateString()+' | '+s.type+' | '+(h?h+'h ':'')+m+'m\n'});
+        if(f.goals.length){c+='\n--- GOALS ---\n';f.goals.forEach(g=>{c+=g.emoji+' '+g.title+' | '+g.current+'/'+g.target+' '+g.unit+' ('+(g.current/g.target*100).toFixed(0)+'%)\n'})}
+        download(c,'report-'+f.name+'.txt','text/plain');alert('Report downloaded!');
+    }
+    function exportJSON(){download(JSON.stringify(data.friends[currentFriend],null,2),'data-'+data.friends[currentFriend].name+'.json','application/json')}
+    function exportCSV(){
+        let csv='Date,Type,Description,Duration(min),Points\n';
+        const f=data.friends[currentFriend];f.activities.forEach(a=>{csv+=new Date(a.date).toLocaleDateString()+','+a.type+',"'+a.description.replace(/"/g,'""')+'",'+Math.round(a.duration/60)+','+a.points+'\n'});
+        f.sessions.forEach(s=>{csv+=new Date(s.date).toLocaleDateString()+','+s.type+',Timer,'+Math.round(s.duration/60)+','+s.points+'\n'});
+        download(csv,'data-'+f.name+'.csv','text/csv');
+    }
+    function download(c,f,t){const b=new Blob([c],{type:t}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=f;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
+
+    // Safe DOM helper
+    function $(id){return document.getElementById(id)}
+    function setH(id,v){const e=$(id);if(e)e.textContent=v}
+    function setI(id,v){const e=$(id);if(e)e.innerHTML=v}
+    function setW(id,v){const e=$(id);if(e)e.style.width=v}
+
+    // ===== RENDER ALL =====
+    function renderAll(){
+        try{_renderAll()}catch(e){console.error('Render error:',e)}
+    }
+    function _renderAll(){
+        const f=data.friends[currentFriend];if(!f)return;
+        const today=new Date().toDateString(),ta=f.activities.filter(a=>new Date(a.date).toDateString()===today),ts=f.sessions.filter(s=>new Date(s.date).toDateString()===today);
+        const totalMin=ta.reduce((s,a)=>s+a.duration,0)+ts.reduce((s,a)=>s+a.duration/60,0);
+        const icons={study:'📚',reading:'📖',coding:'💻',exercise:'🏃',work:'💼',break:'☕',other:'📋'};
+        const bgC={study:'rgba(108,92,231,.2)',reading:'rgba(0,206,201,.2)',coding:'rgba(253,121,168,.2)',exercise:'rgba(0,184,148,.2)',work:'rgba(253,203,110,.2)',break:'rgba(129,236,236,.2)',other:'rgba(136,136,170,.2)'};
+
+        // Dashboard stats
+        setH('totalStudy',(totalMin/60).toFixed(1)+'h');
+        setH('tasksDone',ta.length+ts.length);
+        setH('curStreak',f.streak);
+        setH('weekPts',calcPts(f));
+
+        // Activity list
+        const all=[...f.activities,...f.sessions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
+        setI('activityList',all.length?all.map(a=>{const d=a.duration>=3600?(a.duration/3600).toFixed(1)+'h':Math.round(a.duration/60)+'m';return'<div class="ai"><div class="aic" style="background:'+(bgC[a.type]||bgC.other)+'">'+(icons[a.type]||'📋')+'</div><div class="ainf"><h4>'+esc(a.description)+'</h4><p>'+a.type+' • '+new Date(a.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</p></div><span class="at">'+d+'</span><button class="adel" onclick="deleteActivity('+a.id+')"><i class="fas fa-trash"></i></button></div>'}).join(''):'<div class="empty"><i class="fas fa-clipboard-list"></i><p>No activities yet</p></div>');
+
+        // Weekly chart
+        const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],wa=getWeekAgo();
+        const mins=days.map((_,i)=>{const ds=wa+i*86400000,de=ds+86400000;return f.activities.filter(a=>{const t=new Date(a.date).getTime();return t>=ds&&t<de}).reduce((s,a)=>s+a.duration,0)/60});
+        const mx=Math.max(...mins,1);
+        setI('weeklyChart',days.map((d,i)=>'<div class="bw"><div class="bv">'+mins[i].toFixed(0)+'m</div><div class="bar p" style="height:'+Math.max((mins[i]/mx)*180,4)+'px"></div><div class="bl">'+d+'</div></div>').join(''));
+
+        // Timer page
+        setH('todayTotal',Math.floor(totalMin/60)+'h '+Math.round(totalMin%60)+'m');
+        setI('sessionLog',ts.length?ts.slice().reverse().map(s=>{const h=Math.floor(s.duration/3600),m=Math.floor((s.duration%3600)/60);return'<div class="se"><span>'+(icons[s.type]||'📋')+' '+s.type+'</span><span class="dur">'+(h?h+'h ':'')+m+'m</span><span class="tm">'+new Date(s.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span></div>'}).join(''):'<div class="empty"><p>Start a timer!</p></div>');
+
+        // Goals
+        setI('goalsGrid',f.goals.length?f.goals.map(g=>{const p=(g.current/g.target*100).toFixed(0);return'<div class="gc"><div class="gh"><span class="ge">'+g.emoji+'</span><button class="gdel" onclick="deleteGoal('+g.id+')"><i class="fas fa-trash"></i></button></div><h3>'+g.title+'</h3><div class="pb"><div class="pf" style="width:'+p+'%"></div></div><div class="pt"><span>'+g.current+'/'+g.target+' '+g.unit+'</span><span>'+p+'%</span></div><div style="display:flex;gap:6px;margin-top:10px"><button class="btn bs bsm" onclick="updateGoalProgress('+g.id+',-1)">-1</button><button class="btn bgs bsm" onclick="updateGoalProgress('+g.id+',1)">+1</button></div></div>'}).join(''):'<div class="empty" style="grid-column:1/-1"><i class="fas fa-bullseye"></i><p>No goals yet</p></div>');
+        setH('streakBig',f.streak);
+
+        // My code
+        if(f.myCode)setH('myCode',f.myCode);
+
+        // Sub-pages
+        renderChat();renderMood();renderReminders();renderSchedule();renderDailySummary();renderDailyTarget();renderAnalytics();renderCalendar();renderWeekDots();renderXP();renderBadges();renderDailyChallenges();renderChallenges();renderFriendList();
+    }
+
+    function renderFriendList(){
+        const el=document.getElementById('friendsList'),ids=Object.keys(data.friends);
+        const colors=['#6c5ce7','#00cec9','#fd79a8','#00b894','#fdcb6e','#e17055'];
+        el.innerHTML=ids.map((id,i)=>{const f=data.friends[id],c=colors[i%colors.length],isActive=parseInt(id)===currentFriend,total=f.activities.length+f.sessions.length,isMe=parseInt(id)===1;
+            return'<div class="ai" style="'+(isActive?'border:1px solid '+c+'40;background:'+c+'10':'')+'"><div class="av" style="background:'+c+';width:38px;height:38px;font-size:.8rem">'+f.name.substring(0,2).toUpperCase()+'</div><div class="ainf"><h4>'+f.name+(isMe?' (You)':'')+'</h4><p>'+total+' activities • '+f.streak+' streak • Lv.'+(f.level||1)+'</p>'+(f.code?'<p style="font-size:.65rem;color:var(--primary-light);font-family:monospace">'+f.code+'</p>':'')+'</div><div style="display:flex;gap:4px">'+(!isMe?'<button class="btn bs bsm" onclick="switchFriend('+id+')"><i class="fas fa-eye"></i></button>':'')+(!isMe?'<button class="adel" onclick="removeFriend('+id+')"><i class="fas fa-trash"></i></button>':'')+'</div></div>'}).join('');
+    }
+
+    // Friend code system
+    function generateMyCode(){const me=data.friends[1];if(!me.myCode)me.myCode=genCode();saveData(data);document.getElementById('myCode').textContent=me.myCode}
+    function copyMyCode(){let c=data.friends[1].myCode;if(!c){generateMyCode();c=data.friends[1].myCode}navigator.clipboard.writeText(c).then(()=>{const b=document.getElementById('copyCodeBtn');b.innerHTML='<i class="fas fa-check"></i>';setTimeout(()=>b.innerHTML='<i class="fas fa-copy"></i>',1500)})}
+    function addFriendByCode(){
+        const code=document.getElementById('addFriendCode').value.trim().toUpperCase(),name=document.getElementById('addFriendName').value.trim();
+        if(!code||!name)return alert('Fill all fields');
+        if(data.friendCodes[code])return alert('Already added!');
+        if(code===data.friends[1].myCode)return alert("Can't add yourself!");
+        if(code.length!==6)return alert('Invalid code!');
+        const ids=Object.keys(data.friends).map(Number),newId=ids.length?Math.max(...ids)+1:2;
+        data.friends[newId]={name,code,activities:[],sessions:[],goals:[],streak:0,lastActive:null,xp:0,level:1,badges:[],streakFreezes:0,addedAt:new Date().toISOString()};
+        data.friendCodes[code]=newId;saveData(data);
+        document.getElementById('addFriendCode').value='';document.getElementById('addFriendName').value='';
+        currentFriend=newId;renderFriendToggle();renderAll();
+    }
+    function removeFriend(id){if(id===1)return;if(!confirm('Remove?'))return;const code=data.friends[id].code;if(code)delete data.friendCodes[code];delete data.friends[id];saveData(data);currentFriend=1;renderFriendToggle();renderAll()}
+
+    // Streak freeze
+    function useStreakFreeze(){
+        const f=data.friends[currentFriend],weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());weekStart.setHours(0,0,0,0);
+        const freezes=(f._weeklyFreezes||[]).filter(d=>new Date(d)>weekStart);
+        if(freezes.length>=1)return alert('Already used this week!');
+        if(!f._weeklyFreezes)f._weeklyFreezes=[];
+        f._weeklyFreezes.push(new Date().toISOString());
+        saveData(data);renderAll();alert('Streak freeze activated!');
+    }
+
+    // Init
+    function init(){
+        const ids=Object.keys(data.friends);if(ids.length>0)currentFriend=parseInt(ids[0]);
+        renderFriendToggle();renderAll();requestNotificationPermission();scheduleReminders();
+    }
+    init();
+    </script>
+</body>
+</html>
