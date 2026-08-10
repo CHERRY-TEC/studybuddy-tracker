@@ -738,7 +738,7 @@
                 }
             }
         });
-        // Listen for friend data (by friend's UID stored in friendCodes)
+        // Listen for friend data (by friend's UID stored in friendUids)
         Object.keys(data.friendUids||{}).forEach(friendUid=>{
             if(friendUid===currentUid)return;
             fbDb.ref('users/'+friendUid).on('value',snap=>{
@@ -763,6 +763,49 @@
                     }
                 }
             });
+        });
+        // Listen for incoming friend requests — auto-add them
+        fbDb.ref('users/'+currentUid+'/incomingFriends').on('child_added',snap=>{
+            const req=snap.val();
+            if(!req||!req.uid||req.uid===currentUid)return;
+            // Check if already added
+            const alreadyExists=Object.values(data.friendUids||{}).some(fid=>data.friends[fid]&&data.friends[fid].uid===req.uid);
+            if(alreadyExists)return;
+            // Auto-add this friend
+            const ids=Object.keys(data.friends).map(Number),newId=ids.length?Math.max(...ids)+1:2;
+            data.friends[newId]={
+                name:req.name||'Friend',code:req.code||'',uid:req.uid,
+                activities:[],sessions:[],goals:[],streak:0,lastActive:null,
+                xp:0,level:1,badges:[],streakFreezes:0,addedAt:new Date().toISOString()
+            };
+            if(!data.friendCodes)data.friendCodes={};
+            if(req.code)data.friendCodes[req.code]=newId;
+            if(!data.friendUids)data.friendUids={};
+            data.friendUids[req.uid]=newId;
+            localStorage.setItem('friendsTracker',JSON.stringify(data));
+            renderFriendToggle();renderAll();
+            showNotif('👋 New Friend!',req.name+' added you as a friend!');
+            // Confirm back to the requester
+            fbDb.ref('users/'+req.uid+'/friendConfirmations/'+currentUid).set({name:data.friends[1].name,uid:currentUid,time:Date.now()});
+        });
+        // Listen for friend confirmations
+        fbDb.ref('users/'+currentUid+'/friendConfirmations').on('child_added',snap=>{
+            const conf=snap.val();
+            if(!conf||!conf.uid)return;
+            const alreadyExists=Object.values(data.friendUids||{}).some(fid=>data.friends[fid]&&data.friends[fid].uid===conf.uid);
+            if(alreadyExists)return;
+            // Add the confirming friend
+            const ids=Object.keys(data.friends).map(Number),newId=ids.length?Math.max(...ids)+1:2;
+            data.friends[newId]={
+                name:conf.name||'Friend',code:'',uid:conf.uid,
+                activities:[],sessions:[],goals:[],streak:0,lastActive:null,
+                xp:0,level:1,badges:[],streakFreezes:0,addedAt:new Date().toISOString()
+            };
+            if(!data.friendUids)data.friendUids={};
+            data.friendUids[conf.uid]=newId;
+            localStorage.setItem('friendsTracker',JSON.stringify(data));
+            renderFriendToggle();renderAll();
+            showNotif('👋 Friend Connected!',conf.name+' is now your friend!');
         });
     }
     function connectFriendByUid(friendUid){
@@ -1518,23 +1561,27 @@
         if(!data.friendUids)data.friendUids={};
         document.getElementById('addFriendCode').value='';document.getElementById('addFriendName').value='';
         currentFriend=newId;renderFriendToggle();saveData(data);renderAll();
-        // Try to find friend's UID from Firebase
-        if(syncEnabled&&fbDb){
+        // Try to find friend's UID and notify them
+        if(syncEnabled&&fbDb&&currentUid){
             fbDb.ref('friendCodeMap/'+code).once('value').then(snap=>{
                 const friendUid=snap.val();
                 if(friendUid){
                     data.friendUids[friendUid]=newId;
                     localStorage.setItem('friendsTracker',JSON.stringify(data));
+                    // Notify friend so they see us too
+                    const myCode=data.friends[1].myCode;
+                    const myName=data.friends[1].name;
+                    fbDb.ref('users/'+friendUid+'/incomingFriends/'+currentUid).set({name:myName,code:myCode,uid:currentUid,time:Date.now()});
                     listenFromFirebase();
                     connectFriendByUid(friendUid).then(fname=>{
-                        if(fname)alert('Connected to '+fname+"'s data!");
+                        if(fname)alert("Connected! You and "+fname+" can now see each other's activities.");
                     });
                 }else{
-                    alert('Friend added. They need to open the app and login for sync to work.');
+                    alert('Friend added. They need to open the app for sync to work.');
                 }
             }).catch(()=>alert('Friend added. Sync will work once both phones are connected.'));
         }else{
-            alert('Friend added! Setup Firebase sync to see their data in real-time.');
+            alert('Friend added! Login and setup sync to see their data.');
         }
     }
     function removeFriend(id){if(id===1)return;if(!confirm('Remove?'))return;const code=data.friends[id].code;if(code)delete data.friendCodes[code];delete data.friends[id];saveData(data);currentFriend=1;renderFriendToggle();renderAll()}
