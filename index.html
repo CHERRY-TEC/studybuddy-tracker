@@ -274,7 +274,7 @@
                 <button onclick="showPage('friends')"><i class="fas fa-user-plus"></i> Friends</button>
             </nav>
             <div class="hdr-right">
-                <span id="syncStatus" style="font-size:.75rem;display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)" onclick="openModal('fbSetup')"><i class="fas fa-cloud" style="color:var(--muted)"></i> Local</span>
+                <span id="syncStatus" style="font-size:.75rem;display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)"><i class="fas fa-cloud" style="color:var(--muted)"></i> Local</span>
                 <button class="theme-btn" onclick="openModal('notif')" title="Notifications" style="position:relative"><i class="fas fa-bell"></i><span id="notifBadge" style="display:none;position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:var(--danger);border-radius:50%;font-size:.55rem;color:#fff"></span></button>
                 <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon" id="themeIcon"></i></button>
                 <div class="ft" id="friendToggle"></div>
@@ -283,7 +283,6 @@
                     <div class="user-dropdown" id="userDropdown">
                         <div class="ud-name" id="udName">User</div>
                         <div style="font-size:.75rem;color:var(--muted);padding:0 14px 8px" id="udEmail">user@email.com</div>
-                        <button onclick="openModal('fbSetup')"><i class="fas fa-cog"></i> Sync Settings</button>
                         <button onclick="doLogout()" style="color:var(--danger)"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
                     </div>
                 </div>
@@ -530,11 +529,6 @@
                             <button class="btn bp" onclick="startQRScan()" style="flex:1"><i class="fas fa-camera"></i> Scan QR</button>
                         </div>
                     </div>
-                    <div style="background:rgba(253,203,110,.08);border-radius:10px;padding:16px">
-                        <h3 style="font-size:.9rem;margin-bottom:6px">🔄 Real-Time Sync</h3>
-                        <p style="font-size:.75rem;color:var(--muted);margin-bottom:8px">Connect both phones to see each other's activities instantly. Tap below to setup.</p>
-                        <button class="btn bwy" onclick="loadFirebaseConfigIntoForm();openModal('fbSetup')" style="width:100%"><i class="fas fa-cog"></i> Setup Sync (Free Firebase)</button>
-                    </div>
                 </div>
                 <div class="cd">
                     <div class="ch"><h2><i class="fas fa-users" style="color:var(--secondary)"></i> Your Friends</h2></div>
@@ -597,30 +591,6 @@
         <div class="ma"><button class="btn bc" onclick="closeModal('schedule')">Cancel</button><button class="btn bp" onclick="addSchedule()">Add</button></div>
     </div></div>
 
-    <div class="mo" id="fbSetupModal"><div class="mdl" style="max-width:520px">
-        <h2 style="margin-bottom:12px"><i class="fas fa-cloud" style="color:var(--warning)"></i> Setup Real-Time Sync</h2>
-        <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Follow these steps to sync data between both phones:</p>
-        <div style="background:rgba(108,92,231,.08);border-radius:10px;padding:14px;margin-bottom:12px;font-size:.8rem;line-height:1.6">
-            <strong>Step 1:</strong> Go to <a href="https://console.firebase.google.com" target="_blank" style="color:var(--primary-light)">console.firebase.google.com</a><br>
-            <strong>Step 2:</strong> Click <b>Add project</b> → name it anything (e.g., "studybuddy") → Create<br>
-            <strong>Step 3:</strong> Click <b>Realtime Database</b> → Create Database → Start in <b>test mode</b><br>
-            <strong>Step 4:</strong> Click <b>Settings</b> (gear icon) → <b>Project settings</b><br>
-            <strong>Step 5:</strong> Scroll to <b>Your apps</b> → click <b>Web</b> (</>) icon → register app → copy the config<br>
-            <strong>Step 6:</strong> Paste the config values below
-        </div>
-        <div class="fg"><label>API Key</label><input type="text" id="fbApiKey" placeholder="AIzaSy..."></div>
-        <div class="fg"><label>Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="your-project.firebaseapp.com"></div>
-        <div class="fg"><label>Database URL</label><input type="text" id="fbDatabaseURL" placeholder="https://your-project-default-rtdb.firebaseio.com"></div>
-        <div class="fg"><label>Project ID</label><input type="text" id="fbProjectId" placeholder="your-project-id"></div>
-        <div class="fg"><label>Storage Bucket</label><input type="text" id="fbStorageBucket" placeholder="your-project.appspot.com"></div>
-        <div class="fg"><label>App ID</label><input type="text" id="fbAppId" placeholder="1:123456789:web:abcdef"></div>
-        <div class="ma">
-            <button class="btn bc" onclick="closeModal('fbSetup')">Cancel</button>
-            <button class="btn bgs" onclick="saveFirebaseSetup()"><i class="fas fa-check"></i> Save & Connect</button>
-        </div>
-        <div id="fbSetupStatus" style="margin-top:12px;font-size:.8rem;text-align:center"></div>
-    </div></div>
-
     <div class="mo" id="notifModal"><div class="mdl" style="max-width:420px">
         <h2 style="margin-bottom:16px"><i class="fas fa-bell" style="color:var(--warning)"></i> Notifications</h2>
         <div id="notifList" class="al"></div>
@@ -667,20 +637,24 @@
     let data=loadData();
 
     // ===== FIREBASE SYNC =====
+    const firebaseConfig={
+        apiKey:"AIzaSyB4n2adhczkNsr4DUw7jR_EFL129SyRzgQ",
+        authDomain:"khet-diary-76200.firebaseapp.com",
+        databaseURL:"https://khet-diary-76200-default-rtdb.firebaseio.com",
+        projectId:"khet-diary-76200",
+        storageBucket:"khet-diary-76200.firebasestorage.app",
+        messagingSenderId:"184564195930",
+        appId:"1:184564195930:web:a7762d3aeb7773c8bdae63"
+    };
     let fbDb=null,fbAuth=null,syncEnabled=false;
     let currentUid=null;
-    function loadFirebaseConfig(){const s=localStorage.getItem('fbConfig');if(s)try{return JSON.parse(s)}catch(e){}return null}
-    function saveFirebaseConfig(cfg){localStorage.setItem('fbConfig',JSON.stringify(cfg))}
     function initFirebase(){
         try{
-            const cfg=loadFirebaseConfig();
-            if(!cfg||!cfg.apiKey||cfg.apiKey.length<20)return;
             if(typeof firebase==='undefined')return;
-            firebase.initializeApp(cfg);
+            firebase.initializeApp(firebaseConfig);
             fbDb=firebase.database();
             fbAuth=firebase.auth();
             syncEnabled=true;
-            console.log('Firebase connected');
             updateSyncStatus('connected');
             fbAuth.onAuthStateChanged(user=>{
                 if(user){
@@ -920,31 +894,6 @@
         }
     }
 
-    // ===== FIREBASE SETUP WIZARD =====
-    function saveFirebaseSetup(){
-        const apiKey=document.getElementById('fbApiKey').value.trim();
-        const authDomain=document.getElementById('fbAuthDomain').value.trim();
-        const databaseURL=document.getElementById('fbDatabaseURL').value.trim();
-        const projectId=document.getElementById('fbProjectId').value.trim();
-        const storageBucket=document.getElementById('fbStorageBucket').value.trim();
-        const appId=document.getElementById('fbAppId').value.trim();
-        if(!apiKey||!databaseURL||!projectId){document.getElementById('fbSetupStatus').innerHTML='<span style="color:var(--danger)">Please fill API Key, Database URL, and Project ID</span>';return}
-        const cfg={apiKey,authDomain,databaseURL,projectId,storageBucket,appId};
-        saveFirebaseConfig(cfg);
-        document.getElementById('fbSetupStatus').innerHTML='<span style="color:var(--success)">Saved! Reconnecting...</span>';
-        setTimeout(()=>{location.reload()},1000);
-    }
-    function loadFirebaseConfigIntoForm(){
-        const cfg=loadFirebaseConfig();
-        if(cfg){
-            document.getElementById('fbApiKey').value=cfg.apiKey||'';
-            document.getElementById('fbAuthDomain').value=cfg.authDomain||'';
-            document.getElementById('fbDatabaseURL').value=cfg.databaseURL||'';
-            document.getElementById('fbProjectId').value=cfg.projectId||'';
-            document.getElementById('fbStorageBucket').value=cfg.storageBucket||'';
-            document.getElementById('fbAppId').value=cfg.appId||'';
-        }
-    }
     function renderNotifications(){
         const el=document.getElementById('notifList');
         const notifs=(data.notifications||[]).slice().reverse().slice(0,20);
@@ -998,7 +947,7 @@
     function editFriendName(id){const n=prompt('Enter name:',data.friends[id].name);if(n&&n.trim()){data.friends[id].name=n.trim();saveData(data);renderFriendToggle();renderAll()}}
 
     // Modal
-    function openModal(t){document.getElementById(t+'Modal').classList.add('act');if(t==='notif')renderNotifications();if(t==='fbSetup')loadFirebaseConfigIntoForm()}
+    function openModal(t){document.getElementById(t+'Modal').classList.add('act');if(t==='notif')renderNotifications()}
     function closeModal(t){document.getElementById(t+'Modal').classList.remove('act')}
     document.querySelectorAll('.mo').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('act')})});
 
@@ -1607,14 +1556,8 @@
 
     // Init
     function init(){
-        const cfg=loadFirebaseConfig();
-        if(cfg&&cfg.apiKey&&cfg.apiKey.length>20&&typeof firebase!=='undefined'){
-            showLoading();
-            initFirebase();
-        }else{
-            // No Firebase configured — run in local mode
-            showMainApp();
-        }
+        showLoading();
+        initFirebase();
     }
     init();
     </script>
