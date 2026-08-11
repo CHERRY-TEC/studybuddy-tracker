@@ -2327,6 +2327,12 @@
         try{initFirebase();}catch(e){console.error(e)}
         try{initSounds();}catch(e){console.error(e)}
         try{newQuote();}catch(e){console.error(e)}
+        // If Firebase is slow, show login after 3 seconds
+        setTimeout(function(){
+            if(document.getElementById('loadingScreen').style.display!=='none'){
+                showLoginPage();
+            }
+        },3000);
     }
     init();
     </script>
