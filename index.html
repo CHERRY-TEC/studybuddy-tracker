@@ -9,7 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -350,18 +349,17 @@
     </style>
 </head>
 <body>
-    <canvas id="three-canvas"></canvas>
-    <div class="bg-anim"><div class="c"></div><div class="c"></div><div class="c"></div></div>
-    <div class="particle-field" id="particleField"></div>
-    <div class="wave-bg">
-        <svg viewBox="0 0 1440 300"><path fill="rgba(108,92,231,.15)" d="M0,200 C360,100 720,300 1080,150 C1260,100 1380,200 1440,180 L1440,300 L0,300Z"/><path fill="rgba(0,206,201,.1)" d="M0,220 C240,150 480,280 720,200 C960,120 1200,250 1440,200 L1440,300 L0,300Z"/></svg>
+
+
+    <!-- wave removed -->
+
     </div>
 
     <!-- Login Page -->
     <div id="loginPage" class="login-page" style="display:none">
-        <div class="login-card card-3d">
-            <div class="login-logo float-3d">
-                <i class="fas fa-users morph-blob" style="font-size:3rem;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;padding:20px;width:fit-content;margin:0 auto"></i>
+        <div class="login-card">
+            <div class="login-logo">
+                <i class="fas fa-users" style="font-size:3rem;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;padding:20px;width:fit-content;margin:0 auto"></i>
                 <h1>StudyBuddy</h1>
                 <p>Track, compete, and grow together</p>
             </div>
@@ -2323,151 +2321,10 @@
     }
 
     // ===== 3D CANVAS EFFECTS =====
-    function init3D(){
-        if(typeof THREE==='undefined')return;
-        // === Three.js floating particles ===
-        const canvas=document.getElementById('three-canvas');
-        if(!canvas)return;
-        const scene=new THREE.Scene();
-        const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,.1,1000);
-        camera.position.z=5;
-        const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
-        renderer.setSize(window.innerWidth,window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-        renderer.setClearColor(0x000000,0);
-
-        // Particles
-        const COUNT=800;
-        const geo=new THREE.BufferGeometry();
-        const pos=new Float32Array(COUNT*3);
-        const colors=new Float32Array(COUNT*3);
-        const sizes=new Float32Array(COUNT);
-        const speeds=new Float32Array(COUNT);
-        const palette=[[.424,.361,.898],[0,.808,.788],[.988,.475,.659],[.988,.831,.541],[0,.722,.604]];
-        for(let i=0;i<COUNT;i++){
-            pos[i*3]=(Math.random()-.5)*20;
-            pos[i*3+1]=(Math.random()-.5)*20;
-            pos[i*3+2]=(Math.random()-.5)*10;
-            const c=palette[Math.floor(Math.random()*palette.length)];
-            colors[i*3]=c[0];colors[i*3+1]=c[1];colors[i*3+2]=c[2];
-            sizes[i]=Math.random()*3+1;
-            speeds[i]=Math.random()*.5+.2;
-        }
-        geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-        geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
-        geo.setAttribute('size',new THREE.BufferAttribute(sizes,1));
-
-        const mat=new THREE.PointsMaterial({
-            size:.08,vertexColors:true,transparent:true,opacity:.7,
-            blending:THREE.AdditiveBlending,depthWrite:false
-        });
-        const particles=new THREE.Points(geo,mat);
-        scene.add(particles);
-
-        // Connecting lines
-        const lineGeo=new THREE.BufferGeometry();
-        const linePos=new Float32Array(300*6);
-        lineGeo.setAttribute('position',new THREE.BufferAttribute(linePos,3));
-        const lineMat=new THREE.LineBasicMaterial({color:0x6c5ce7,transparent:true,opacity:.08,blending:THREE.AdditiveBlending});
-        const lines=new THREE.Points(lineGeo,lineMat);
-        scene.add(lines);
-
-        // Mouse tracking
-        let mouseX=0,mouseY=0;
-        document.addEventListener('mousemove',e=>{
-            mouseX=(e.clientX/window.innerWidth-.5)*2;
-            mouseY=(e.clientY/window.innerHeight-.5)*2;
-        });
-
-        // Animate
-        let t=0;
-        function animate3D(){
-            requestAnimationFrame(animate3D);
-            t+=.005;
-            particles.rotation.y=t*.3;
-            particles.rotation.x=Math.sin(t*.5)*.1;
-            // Mouse influence
-            camera.position.x+=(mouseX*.5-camera.position.x)*.02;
-            camera.position.y+=(-mouseY*.5-camera.position.y)*.02;
-            camera.lookAt(0,0,0);
-            // Wave particles
-            const p=geo.attributes.position.array;
-            for(let i=0;i<COUNT;i++){
-                p[i*3+1]+=Math.sin(t*2+i*.1)*.003;
-                p[i*3]+=Math.cos(t+i*.05)*.002;
-            }
-            geo.attributes.position.needsUpdate=true;
-            // Update connecting lines (nearby particles)
-            let li=0;
-            const lp=lines.geometry.attributes.position.array;
-            const threshold=2.5;
-            for(let i=0;i<Math.min(COUNT,100)&&li<300;i++){
-                for(let j=i+1;j<Math.min(COUNT,100)&&li<300;j++){
-                    const dx=p[i*3]-p[j*3],dy=p[i*3+1]-p[j*3+1],dz=p[i*3+2]-p[j*3+2];
-                    const dist=Math.sqrt(dx*dx+dy*dy+dz*dz);
-                    if(dist<threshold){
-                        lp[li*6]=p[i*3];lp[li*6+1]=p[i*3+1];lp[li*6+2]=p[i*3+2];
-                        lp[li*6+3]=p[j*3];lp[li*6+4]=p[j*3+1];lp[li*6+5]=p[j*3+2];
-                        li++;
-                    }
-                }
-            }
-            for(let i=li*6;i<300*6;i++)lp[i]=0;
-            lines.geometry.attributes.position.needsUpdate=true;
-            renderer.render(scene,camera);
-        }
-        animate3D();
-
-        window.addEventListener('resize',()=>{
-            camera.aspect=window.innerWidth/window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth,window.innerHeight);
-        });
-
-        // === Floating particles (DOM) ===
-        const pf=document.getElementById('particleField');
-        for(let i=0;i<30;i++){
-            const p=document.createElement('div');
-            p.className='particle';
-            const size=Math.random()*4+2;
-            p.style.cssText='width:'+size+'px;height:'+size+'px;left:'+Math.random()*100+'%;animation-duration:'+(Math.random()*15+10)+'s;animation-delay:'+(Math.random()*-20)+'s;--drift:'+(Math.random()*200-100)+'px;background:'+
-                ['rgba(108,92,231,.4)','rgba(0,206,201,.4)','rgba(253,121,168,.3)','rgba(253,203,110,.3)'][Math.floor(Math.random()*4)];
-            pf.appendChild(p);
-        }
-
-        // === 3D Card tilt ===
-        document.querySelectorAll('.card-3d').forEach(card=>{
-            card.addEventListener('mousemove',e=>{
-                const r=card.getBoundingClientRect();
-                const x=(e.clientX-r.left)/r.width-.5;
-                const y=(e.clientY-r.top)/r.height-.5;
-                card.style.setProperty('--tx',(-y*10)+'deg');
-                card.style.setProperty('--ty',(x*10)+'deg');
-                card.classList.add('tilt');
-            });
-            card.addEventListener('mouseleave',()=>{
-                card.style.setProperty('--tx','0deg');
-                card.style.setProperty('--ty','0deg');
-                card.classList.remove('tilt');
-            });
-        });
-
-        // === Click ripple effect ===
-        document.addEventListener('click',e=>{
-            const ripple=document.createElement('div');
-            ripple.className='ripple';
-            ripple.style.left=e.pageX+'px';
-            ripple.style.top=e.pageY+'px';
-            document.body.appendChild(ripple);
-            setTimeout(()=>ripple.remove(),1500);
-        });
-    }
-
     // Init
     function init(){
-        try{showLoading();}catch(e){}
+        showLoading()
         try{initFirebase();}catch(e){console.error(e)}
-        try{init3D();}catch(e){console.error('3D init failed:',e)}
         try{initSounds();}catch(e){console.error(e)}
         try{newQuote();}catch(e){console.error(e)}
     }
