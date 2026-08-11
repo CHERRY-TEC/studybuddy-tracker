@@ -944,8 +944,11 @@
             if(remote&&remote.friends){
                 data=remote;
             }
+            // Ensure friend 1 always exists
+            if(!data.friends[1])data.friends[1]={name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0};
             localStorage.setItem('friendsTracker',JSON.stringify(data));
-            const ids=Object.keys(data.friends);if(ids.length>0)currentFriend=parseInt(ids[0]);
+            const ids=Object.keys(data.friends).filter(id=>data.friends[id]);
+            if(ids.length>0)currentFriend=parseInt(ids[0]);
             renderFriendToggle();renderAll();
             listenFromFirebase();
         }).catch(()=>{showMainApp()});
@@ -959,8 +962,10 @@
                 const oldTs=data.syncTimestamp||0;
                 if(remote.syncTimestamp>oldTs){
                     data=remote;
+                    if(!data.friends[1])data.friends[1]={name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0};
                     localStorage.setItem('friendsTracker',JSON.stringify(data));
-                    const ids=Object.keys(data.friends);if(ids.length>0)currentFriend=parseInt(ids[0]);
+                    const ids=Object.keys(data.friends).filter(id=>data.friends[id]);
+                    if(ids.length>0)currentFriend=parseInt(ids[0]);
                     renderFriendToggle();renderAll();
                 }
             }
@@ -1059,10 +1064,11 @@
         document.getElementById('loadingScreen').style.display='none';
     }
     function showMainApp(){
+        if(!data.friends[1])data.friends[1]={name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0};
         document.getElementById('loginPage').style.display='none';
         document.getElementById('mainApp').style.display='block';
         document.getElementById('loadingScreen').style.display='none';
-        const ids=Object.keys(data.friends);if(ids.length>0)currentFriend=parseInt(ids[0]);
+        const ids=Object.keys(data.friends).filter(id=>data.friends[id]);if(ids.length>0)currentFriend=parseInt(ids[0]);
         renderFriendToggle();renderAll();requestNotificationPermission();scheduleReminders();
         // Set avatar
         const av=document.getElementById('userAvatar');
@@ -1304,11 +1310,14 @@
     function switchFriend(id){currentFriend=parseInt(id);renderFriendToggle();renderAll()}
     function renderFriendToggle(){
         const c=document.getElementById('friendToggle');
-        const ids=Object.keys(data.friends);
+        if(!c)return;
+        const ids=Object.keys(data.friends).filter(id=>data.friends[id]);
+        if(ids.length===0)return;
+        if(!data.friends[currentFriend])currentFriend=parseInt(ids[0]);
         const maxShow=5;
         const show=ids.slice(0,maxShow);
         const extra=ids.length-maxShow;
-        let html=show.map(id=>{const f=data.friends[id];return'<button class="'+(parseInt(id)===currentFriend?'active':'')+'" onclick="switchFriend('+id+')" ondblclick="editFriendName('+id+')">'+f.name+'</button>'}).join('');
+        let html=show.map(id=>{const f=data.friends[id];if(!f)return'';return'<button class="'+(parseInt(id)===currentFriend?'active':'')+'" onclick="switchFriend('+id+')" ondblclick="editFriendName('+id+')">'+esc(f.name||'Friend')+'</button>'}).join('');
         if(extra>0)html+='<button onclick="showPage(\'friends\')" title="'+extra+' more friends">+'+extra+'</button>';
         c.innerHTML=html;
     }
@@ -1688,7 +1697,14 @@
         try{_renderAll()}catch(e){console.error('Render error:',e)}
     }
     function _renderAll(){
-        const f=data.friends[currentFriend];if(!f)return;
+        const f=data.friends[currentFriend];
+        if(!f){
+            // Ensure at least friend 1 exists
+            if(!data.friends[1])data.friends[1]={name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0};
+            currentFriend=1;
+            renderFriendToggle();
+            return _renderAll();
+        }
         const today=new Date().toDateString(),ta=f.activities.filter(a=>new Date(a.date).toDateString()===today),ts=f.sessions.filter(s=>new Date(s.date).toDateString()===today);
         const totalMin=ta.reduce((s,a)=>s+a.duration,0)+ts.reduce((s,a)=>s+a.duration/60,0);
         const icons={study:'📚',reading:'📖',coding:'💻',exercise:'🏃',work:'💼',break:'☕',other:'📋'};
