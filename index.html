@@ -248,6 +248,105 @@
 
         .morph-blob{border-radius:60% 40% 30% 70%/60% 30% 70% 40%;animation:morph 8s ease-in-out infinite}
         @keyframes morph{0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%}25%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%}50%{border-radius:50% 60% 30% 70%/30% 60% 70% 40%}75%{border-radius:40% 60% 70% 40%/60% 30% 40% 70%}}
+
+        /* ===== POMODORO ===== */
+        .pomodoro-ring{width:220px;height:220px;border-radius:50%;position:relative;margin:0 auto 20px}
+        .pomodoro-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+        .pomodoro-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+        .pomodoro-ring .bg-ring{stroke:rgba(108,92,231,.15)}
+        .pomodoro-ring .fg-ring{stroke:var(--primary);transition:stroke-dashoffset 1s linear}
+        .pomodoro-ring .pomo-time{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+        .pomo-phase{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+        .pomo-phase button{padding:6px 16px;border:1px solid rgba(108,92,231,.2);border-radius:20px;background:transparent;color:var(--muted);font-family:inherit;cursor:pointer;transition:.3s;font-size:.8rem}
+        .pomo-phase button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .pomo-sessions{display:flex;gap:6px;justify-content:center;margin-top:12px}
+        .pomo-dot{width:12px;height:12px;border-radius:50%;background:rgba(108,92,231,.2);transition:.3s}
+        .pomo-dot.done{background:var(--success)}
+        .pomo-dot.active{background:var(--primary);box-shadow:0 0 10px var(--primary)}
+
+        /* ===== AMBIENCE SOUNDS ===== */
+        .sound-card{background:var(--bg2);border:1px solid rgba(108,92,231,.1);border-radius:16px;padding:20px;text-align:center;cursor:pointer;transition:.3s;position:relative;overflow:hidden}
+        .sound-card:hover{transform:translateY(-4px);border-color:rgba(108,92,231,.3)}
+        .sound-card.playing{border-color:var(--success);box-shadow:0 0 20px rgba(0,184,148,.2)}
+        .sound-card .sound-icon{font-size:2.5rem;margin-bottom:10px;display:block}
+        .sound-card .sound-name{font-weight:600;font-size:.9rem}
+        .sound-card .sound-vol{margin-top:10px}
+        .sound-card .sound-vol input[type=range]{width:80%;accent-color:var(--primary)}
+        .sound-waves{position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--success);transform:scaleX(0);transition:.3s;transform-origin:left}
+        .sound-card.playing .sound-waves{transform:scaleX(1)}
+        .mixer-bar{height:4px;border-radius:2px;background:rgba(108,92,231,.15);margin-top:6px;overflow:hidden}
+        .mixer-fill{height:100%;background:var(--primary);border-radius:2px;transition:.3s}
+
+        /* ===== CALENDAR ===== */
+        .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+        .cal-head{text-align:center;font-size:.7rem;color:var(--muted);padding:6px 0;font-weight:600}
+        .cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.75rem;cursor:pointer;transition:.3s;position:relative;background:rgba(255,255,255,.03);border:1px solid transparent}
+        .cal-day:hover{border-color:rgba(108,92,231,.3)}
+        .cal-day.today{border-color:var(--primary);font-weight:700}
+        .cal-day.has-activity{background:rgba(0,184,148,.15);border-color:rgba(0,184,148,.3)}
+        .cal-day.high-activity{background:rgba(0,184,148,.3);border-color:rgba(0,184,148,.5)}
+        .cal-day.future{opacity:.4}
+        .cal-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px}
+        .cal-nav button{background:rgba(108,92,231,.2);border:none;color:var(--primary-light);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem}
+        .cal-nav span{font-weight:600;font-size:1rem}
+        .cal-legend{display:flex;gap:12px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+        .cal-legend span{display:flex;align-items:center;gap:4px;font-size:.7rem;color:var(--muted)}
+        .cal-legend i{width:12px;height:12px;border-radius:3px}
+
+        /* ===== LEADERBOARD ===== */
+        .lb-podium{display:flex;justify-content:center;align-items:flex-end;gap:12px;margin-bottom:24px;padding:0 20px}
+        .lb-place{display:flex;flex-direction:column;align-items:center;transition:.3s}
+        .lb-place:hover{transform:translateY(-5px)}
+        .lb-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;margin-bottom:8px;border:3px solid transparent;position:relative}
+        .lb-place:nth-child(1) .lb-avatar{border-color:#ffd700;width:68px;height:68px;font-size:1.6rem}
+        .lb-place:nth-child(2) .lb-avatar{border-color:#c0c0c0}
+        .lb-place:nth-child(3) .lb-avatar{border-color:#cd7f32}
+        .lb-crown{position:absolute;top:-16px;font-size:1.2rem}
+        .lb-name{font-size:.8rem;font-weight:600;margin-bottom:4px}
+        .lb-xp{font-size:.7rem;color:var(--muted)}
+        .lb-bar{width:70px;border-radius:8px 8px 0 0;transition:.5s}
+        .lb-list-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:rgba(255,255,255,.03);margin-bottom:6px;border:1px solid rgba(108,92,231,.08);transition:.3s}
+        .lb-list-item:hover{background:rgba(108,92,231,.08);border-color:rgba(108,92,231,.2)}
+        .lb-rank{font-weight:700;font-size:1rem;width:30px;text-align:center;color:var(--muted)}
+
+        /* ===== NOTES ===== */
+        .note-card{background:var(--bg2);border:1px solid rgba(108,92,231,.1);border-radius:12px;padding:16px;transition:.3s;cursor:pointer;position:relative}
+        .note-card:hover{border-color:rgba(108,92,231,.3);transform:translateY(-2px)}
+        .note-card .note-title{font-weight:600;font-size:.9rem;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+        .note-card .note-preview{font-size:.8rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4}
+        .note-card .note-date{font-size:.65rem;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:4px}
+        .note-card .note-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px;opacity:0;transition:.3s}
+        .note-card:hover .note-actions{opacity:1}
+        .note-editor{background:var(--bg2);border:1px solid rgba(108,92,231,.15);border-radius:12px;padding:16px;min-height:300px}
+        .note-editor textarea{width:100%;min-height:250px;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:.9rem;resize:vertical;outline:none;line-height:1.6}
+        .note-colors{display:flex;gap:6px;margin-bottom:12px}
+        .note-color{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:.3s}
+        .note-color.active{border-color:#fff;transform:scale(1.2)}
+
+        /* ===== QUOTES ===== */
+        .quote-card{background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(0,206,201,.1));border:1px solid rgba(108,92,231,.2);border-radius:16px;padding:24px;text-align:center;position:relative;overflow:hidden}
+        .quote-card::before{content:'"';position:absolute;top:-10px;left:10px;font-size:6rem;color:rgba(108,92,231,.15);font-family:serif;line-height:1}
+        .quote-text{font-size:1rem;font-style:italic;line-height:1.6;margin-bottom:12px;position:relative;z-index:1}
+        .quote-author{font-size:.8rem;color:var(--primary-light);font-weight:500}
+        .quote-refresh{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);border:none;color:var(--text);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.8rem;transition:.3s}
+        .quote-refresh:hover{background:rgba(108,92,231,.3);transform:rotate(180deg)}
+
+        /* ===== ACHIEVEMENTS ===== */
+        .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+        .badge-card{background:var(--bg2);border:1px solid rgba(108,92,231,.1);border-radius:12px;padding:16px;text-align:center;transition:.3s;position:relative;overflow:hidden}
+        .badge-card:hover{transform:translateY(-3px);border-color:rgba(108,92,231,.3)}
+        .badge-card.locked{opacity:.4;filter:grayscale(1)}
+        .badge-card .badge-icon{font-size:2rem;margin-bottom:8px;display:block}
+        .badge-card .badge-name{font-size:.8rem;font-weight:600}
+        .badge-card .badge-desc{font-size:.65rem;color:var(--muted);margin-top:4px}
+        .badge-card.unlocked::after{content:'✓';position:absolute;top:8px;right:8px;width:20px;height:20px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff}
+
+        /* ===== EXPORT ===== */
+        .export-btn{display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg2);border:1px solid rgba(108,92,231,.1);border-radius:12px;cursor:pointer;transition:.3s;width:100%}
+        .export-btn:hover{border-color:rgba(108,92,231,.3);background:rgba(108,92,231,.05)}
+        .export-btn i{font-size:1.4rem;color:var(--primary)}
+        .export-btn .exp-info h4{font-size:.9rem;margin-bottom:2px}
+        .export-btn .exp-info p{font-size:.75rem;color:var(--muted)}
     </style>
 </head>
 <body>
@@ -315,6 +414,10 @@
                 <button onclick="showPage('gamification')"><i class="fas fa-gamepad"></i> XP</button>
                 <button onclick="showPage('reminders')"><i class="fas fa-bell"></i> Reminders</button>
                 <button onclick="showPage('friends')"><i class="fas fa-user-plus"></i> Friends</button>
+                <button onclick="showPage('leaderboard')"><i class="fas fa-medal"></i> Rank</button>
+                <button onclick="showPage('calendar')"><i class="fas fa-calendar-alt"></i> Calendar</button>
+                <button onclick="showPage('notes')"><i class="fas fa-sticky-note"></i> Notes</button>
+                <button onclick="showPage('ambience')"><i class="fas fa-headphones"></i> Sounds</button>
             </nav>
             <div class="hdr-right">
                 <span id="syncStatus" style="font-size:.75rem;display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05)"><i class="fas fa-cloud" style="color:var(--muted)"></i> Local</span>
@@ -328,6 +431,8 @@
                         <div style="font-size:.75rem;color:var(--muted);padding:0 14px 8px" id="udEmail">user@email.com</div>
                         <button onclick="closeModal('');setTimeout(()=>openProfileModal(),100)"><i class="fas fa-user-circle"></i> Profile</button>
                         <button onclick="doLogout()" style="color:var(--danger)"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+                        <button onclick="exportJSON()"><i class="fas fa-download"></i> Export JSON</button>
+                        <button onclick="exportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
                     </div>
                 </div>
             </div>
@@ -361,6 +466,17 @@
                     <div class="al" id="activityList"></div>
                 </div>
             </div>
+            <div style="margin-top:20px">
+                <div class="quote-card" id="quoteCard">
+                    <button class="quote-refresh" onclick="newQuote()"><i class="fas fa-sync-alt"></i></button>
+                    <div class="quote-text" id="quoteText">Loading...</div>
+                    <div class="quote-author" id="quoteAuthor"></div>
+                </div>
+            </div>
+            <div class="cd" style="margin-top:20px">
+                <div class="ch"><h2><i class="fas fa-calendar-day" style="color:var(--primary)"></i> Today's Agenda</h2></div>
+                <div id="agendaList" class="al"></div>
+            </div>
         </div>
 
         <!-- Timer -->
@@ -381,11 +497,12 @@
                     <button class="tbtn sp" onclick="stopTimer()"><i class="fas fa-stop"></i></button>
                 </div>
                 <div style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;flex-wrap:wrap">
-                    <button class="btn bs" onclick="startPomodoro()"><i class="fas fa-clock"></i> Pomodoro (25m)</button>
+                    <button class="btn bp" onclick="startPomodoroFromTimer()"><i class="fas fa-clock"></i> Pomodoro (25/5)</button>
                     <button class="btn bs" onclick="quickTimer(5)">5m Break</button>
                     <button class="btn bs" onclick="quickTimer(15)">15m Break</button>
                     <button class="btn bgs" onclick="enterFocusMode()"><i class="fas fa-expand"></i> Focus Mode</button>
                 </div>
+                <div id="pomodoroDisplay"></div>
                 <div class="cd"><div class="ch"><h2>Today's Sessions</h2><span id="todayTotal" style="color:var(--primary-light);font-weight:600">0h 0m</span></div><div class="sess-log" id="sessionLog"></div></div>
             </div>
         </div>
@@ -580,6 +697,81 @@
                 </div>
             </div>
         </div>
+
+        <!-- Leaderboard -->
+        <div id="leaderboard" class="page">
+            <div class="cd" style="margin-bottom:20px">
+                <div class="ch"><h2><i class="fas fa-medal" style="color:var(--warning)"></i> Leaderboard</h2><button class="btn bp" onclick="openModal('challenge')"><i class="fas fa-bolt"></i> Challenge</button></div>
+                <div id="podium" class="lb-podium"></div>
+            </div>
+            <div class="cd">
+                <div class="ch"><h2><i class="fas fa-list-ol" style="color:var(--primary)"></i> All Rankings</h2></div>
+                <div id="lbList"></div>
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div id="calendar" class="page">
+            <div class="cd" style="margin-bottom:20px">
+                <div class="ch"><h2><i class="fas fa-calendar-alt" style="color:var(--secondary)"></i> Activity Calendar</h2></div>
+                <div class="cal-nav">
+                    <button onclick="changeCalMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <span id="calMonthLabel"></span>
+                    <button onclick="changeCalMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+                <div class="cal-legend">
+                    <span><i style="background:rgba(255,255,255,.03)"></i> No activity</span>
+                    <span><i style="background:rgba(0,184,148,.15)"></i> Some activity</span>
+                    <span><i style="background:rgba(0,184,148,.3)"></i> High activity</span>
+                    <span><i style="background:var(--primary)"></i> Today</span>
+                </div>
+            </div>
+            <div class="cd">
+                <div class="ch"><h2><i class="fas fa-chart-line" style="color:var(--success)"></i> Monthly Summary</h2></div>
+                <div id="calSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px"></div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div id="notes" class="page">
+            <div class="cd">
+                <div class="ch"><h2><i class="fas fa-sticky-note" style="color:var(--warning)"></i> Quick Notes</h2><button class="btn bp" onclick="createNote()"><i class="fas fa-plus"></i> New Note</button></div>
+                <div id="notesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px"></div>
+            </div>
+            <div class="cd" id="noteEditorWrap" style="display:none;margin-top:16px">
+                <div class="ch"><h2 id="noteEditorTitle">New Note</h2><div style="display:flex;gap:6px"><button class="btn bp" onclick="saveNote()"><i class="fas fa-save"></i> Save</button><button class="btn bc" onclick="closeNoteEditor()"><i class="fas fa-times"></i> Close</button></div></div>
+                <div class="note-colors" id="noteColors"></div>
+                <input type="text" id="noteTitleInput" placeholder="Note title..." style="width:100%;background:transparent;border:none;color:var(--text);font-size:1.1rem;font-weight:600;font-family:inherit;outline:none;margin-bottom:12px;border-bottom:1px solid rgba(108,92,231,.2);padding-bottom:8px">
+                <div class="note-editor"><textarea id="noteContentInput" placeholder="Start writing..."></textarea></div>
+            </div>
+        </div>
+
+        <!-- Ambience Sounds -->
+        <div id="ambience" class="page">
+            <div class="cd" style="margin-bottom:20px">
+                <div class="ch"><h2><i class="fas fa-headphones" style="color:var(--secondary)"></i> Study Ambience</h2><div id="masterVolume" style="display:flex;align-items:center;gap:8px"><i class="fas fa-volume-up" style="color:var(--muted);font-size:.8rem"></i><input type="range" min="0" max="100" value="80" style="width:100px;accent-color:var(--primary)" oninput="setMasterVolume(this.value)"></div></div>
+                <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Mix and match sounds. Tap to toggle, slide to adjust volume.</p>
+                <div id="soundsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px"></div>
+            </div>
+            <div class="cd">
+                <div class="ch"><h2><i class="fas fa-sliders-h" style="color:var(--accent)"></i> Sound Mixer</h2></div>
+                <div id="mixerPanel"></div>
+                <div style="display:flex;gap:8px;margin-top:16px">
+                    <button class="btn bp" onclick="saveSoundPreset()"><i class="fas fa-save"></i> Save Preset</button>
+                    <button class="btn bs" onclick="stopAllSounds()"><i class="fas fa-stop"></i> Stop All</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements -->
+        <div id="achievements" class="page">
+            <div class="cd" style="margin-bottom:20px">
+                <div class="ch"><h2><i class="fas fa-trophy" style="color:var(--warning)"></i> Achievements</h2></div>
+                <div id="achieveStats" style="display:flex;gap:20px;justify-content:center;margin-bottom:20px"></div>
+                <div id="badgeGrid" class="badge-grid"></div>
+            </div>
+        </div>
     </main>
     </div><!-- end mainApp -->
 
@@ -692,8 +884,8 @@
 
     function loadData(){
         const s=localStorage.getItem('friendsTracker');
-        if(s){const p=JSON.parse(s);p.friendCodes=p.friendCodes||{};p.friendUids=p.friendUids||{};p.messages=p.messages||[];p.reminders=p.reminders||[];p.moods=p.moods||{};p.challenges=p.challenges||[];p.schedule=p.schedule||[];p.dailyTarget=p.dailyTarget||4;return p}
-        return{friends:{1:{name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0}},friendCodes:{},friendUids:{},messages:[],reminders:[],moods:{},challenges:[],schedule:[],dailyTarget:4}
+        if(s){const p=JSON.parse(s);p.friendCodes=p.friendCodes||{};p.friendUids=p.friendUids||{};p.messages=p.messages||[];p.reminders=p.reminders||[];p.moods=p.moods||{};p.challenges=p.challenges||[];p.schedule=p.schedule||[];p.dailyTarget=p.dailyTarget||4;p.notes=p.notes||[];return p}
+        return{friends:{1:{name:'You',activities:[],sessions:[],goals:[],streak:0,lastActive:null,myCode:null,xp:0,level:1,badges:[],streakFreezes:0}},friendCodes:{},friendUids:{},messages:[],reminders:[],moods:{},challenges:[],schedule:[],dailyTarget:4,notes:[]}
     }
     function saveData(d){localStorage.setItem('friendsTracker',JSON.stringify(d));syncToFirebase()}
     let data=loadData();
@@ -1523,6 +1715,8 @@
 
         // Sub-pages
         renderChat();renderMood();renderReminders();renderSchedule();renderDailySummary();renderDailyTarget();renderAnalytics();renderCalendar();renderWeekDots();renderXP();renderBadges();renderDailyChallenges();renderChallenges();renderFriendList();
+        // New features
+        renderAchievements();renderLeaderboard();renderNotes();renderPomodoro();renderAgenda();newQuote();
         // Notification badge
         const notifCount=(data.notifications||[]).length;
         const badge=document.getElementById('notifBadge');
@@ -1738,13 +1932,386 @@
         saveData(data);renderAll();alert('Streak freeze activated!');
     }
 
-    // Init
-    function init(){
-        showLoading();
-        initFirebase();
-        init3D();
+    // ===== ACHIEVEMENTS =====
+    const ALL_BADGES=[
+        {id:'first_log',icon:'📝',name:'First Step',desc:'Log your first activity',check:f=>f.activities.length>=1},
+        {id:'ten_logs',icon:'🔟',name:'Getting Started',desc:'Log 10 activities',check:f=>f.activities.length>=10},
+        {id:'fifty_logs',icon:'📚',name:'Bookworm',desc:'Log 50 activities',check:f=>f.activities.length>=50},
+        {id:'hundred_logs',icon:'💯',name:'Century Club',desc:'Log 100 activities',check:f=>f.activities.length>=100},
+        {id:'streak3',icon:'🔥',name:'On Fire',desc:'3-day streak',check:f=>f.streak>=3},
+        {id:'streak7',icon:'⚡',name:'Unstoppable',desc:'7-day streak',check:f=>f.streak>=7},
+        {id:'streak14',icon:'💎',name:'Diamond Will',desc:'14-day streak',check:f=>f.streak>=14},
+        {id:'streak30',icon:'👑',name:'Legend',desc:'30-day streak',check:f=>f.streak>=30},
+        {id:'level5',icon:'⭐',name:'Rising Star',desc:'Reach Level 5',check:f=>(f.level||1)>=5},
+        {id:'level10',icon:'🌟',name:'Superstar',desc:'Reach Level 10',check:f=>(f.level||1)>=10},
+        {id:'level25',icon:'💫',name:'Cosmic',desc:'Reach Level 25',check:f=>(f.level||1)>=25},
+        {id:'xp1000',icon:'🏆',name:'Champion',desc:'Earn 1000 XP',check:f=>(f.xp||0)>=1000},
+        {id:'xp5000',icon:'🎖️',name:'Grandmaster',desc:'Earn 5000 XP',check:f=>(f.xp||0)>=5000},
+        {id:'first_friend',icon:'🤝',name:'Social Butterfly',desc:'Add your first friend',check:(f,ids)=>ids.length>=2},
+        {id:'goal1',icon:'🎯',name:'Goal Getter',desc:'Complete a goal',check:f=>f.goals&&f.goals.some(g=>g.progress>=g.target)},
+        {id:'hour10',icon:'⏰',name:'Dedicated',desc:'Study 10 total hours',check:f=>f.sessions.reduce((a,s)=>a+s.duration,0)/3600>=10},
+        {id:'hour50',icon:'🎓',name:'Scholar',desc:'Study 50 total hours',check:f=>f.sessions.reduce((a,s)=>a+s.duration,0)/3600>=50},
+        {id:'early_bird',icon:'🐦',name:'Early Bird',desc:'Log activity before 7 AM',check:f=>f.activities.some(a=>{const h=new Date(a.time).getHours();return h<7})},
+        {id:'night_owl',icon:'🦉',name:'Night Owl',desc:'Log activity after 11 PM',check:f=>f.activities.some(a=>{const h=new Date(a.time).getHours();return h>=23})},
+        {id:'polyglot',icon:'🌈',name:'Polyglot',desc:'Log 5 different activity types',check:f=>new Set(f.activities.map(a=>a.type)).size>=5},
+    ];
+
+    function renderAchievements(){
+        const f=data.friends[currentFriend]||data.friends[1];
+        const ids=Object.keys(data.friends);
+        const unlocked=ALL_BADGES.filter(b=>b.check(f,ids));
+        document.getElementById('achieveStats').innerHTML=
+            '<div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:var(--warning)">'+unlocked.length+'</div><div style="font-size:.75rem;color:var(--muted)">Unlocked</div></div>'+
+            '<div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:var(--muted)">'+(ALL_BADGES.length-unlocked.length)+'</div><div style="font-size:.75rem;color:var(--muted)">Locked</div></div>'+
+            '<div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:var(--success)">'+Math.round(unlocked.length/ALL_BADGES.length*100)+'%</div><div style="font-size:.75rem;color:var(--muted)">Complete</div></div>';
+        document.getElementById('badgeGrid').innerHTML=ALL_BADGES.map(b=>{
+            const isUnlocked=unlocked.includes(b);
+            return'<div class="badge-card '+(isUnlocked?'unlocked':'locked')+'"><span class="badge-icon">'+b.icon+'</span><div class="badge-name">'+b.name+'</div><div class="badge-desc">'+b.desc+'</div></div>';
+        }).join('');
     }
-    init();
+
+    // ===== LEADERBOARD =====
+    function renderLeaderboard(){
+        const ids=Object.keys(data.friends);
+        const ranked=ids.map(id=>{const f=data.friends[id];return{id,...f,xp:f.xp||0,level:f.level||1,score:(f.xp||0)+((f.level||1)*100)+(f.streak*50)}}).sort((a,b)=>b.score-a.score);
+        const colors=['#6c5ce7','#00cec9','#fd79a8','#00b894','#fdcb6e','#e17055'];
+        // Podium (top 3)
+        const podium=ranked.slice(0,3);
+        const podiumOrder=podium.length>=3?[podium[1],podium[0],podium[2]]:podium.length===2?[podium[1],podium[0]]:[podium[0]];
+        document.getElementById('podium').innerHTML=podiumOrder.map((p,i)=>{
+            const realRank=i===0?2:i===1?1:i===2?3:i+1;
+            const c=colors[ids.indexOf(p.id)%colors.length];
+            const barH=realRank===1?120:realRank===2?90:70;
+            let avHtml='';
+            if(p.avatar&&p.avatar.startsWith('data:'))avHtml='<img src="'+p.avatar+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
+            else if(p.avatar)avHtml=p.avatar;
+            else avHtml=p.name.substring(0,2).toUpperCase();
+            return'<div class="lb-place"><div class="lb-avatar" style="background:'+c+'">'+(realRank===1?'<span class="lb-crown">👑</span>':'')+avHtml+'</div><div class="lb-name">'+p.name+'</div><div class="lb-xp">'+p.xp+' XP • Lv.'+p.level+'</div><div class="lb-bar" style="background:'+c+';height:'+barH+'px"></div><div style="font-size:1.2rem;margin-top:6px">'+(realRank===1?'🥇':realRank===2?'🥈':realRank===3?'三等奖':'')+'</div></div>';
+        }).join('');
+        // List
+        document.getElementById('lbList').innerHTML=ranked.map((r,i)=>{
+            const c=colors[ids.indexOf(r.id)%colors.length];
+            let avHtml='';
+            if(r.avatar&&r.avatar.startsWith('data:'))avHtml='<img src="'+r.avatar+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
+            else if(r.avatar)avHtml=r.avatar;
+            else avHtml=r.name.substring(0,2).toUpperCase();
+            return'<div class="lb-list-item"><div class="lb-rank">'+(i+1)+'</div><div style="width:36px;height:36px;border-radius:50%;background:'+c+';display:flex;align-items:center;justify-content:center;font-size:.75rem">'+avHtml+'</div><div style="flex:1"><div style="font-weight:600;font-size:.9rem">'+r.name+'</div><div style="font-size:.7rem;color:var(--muted)">Level '+r.level+' • '+r.streak+' streak</div></div><div style="text-align:right"><div style="font-weight:700;color:var(--warning)">'+r.xp+' XP</div><div style="font-size:.65rem;color:var(--muted)">Score: '+r.score+'</div></div></div>';
+        }).join('');
+    }
+
+    // ===== CALENDAR =====
+    function renderCalendar(){
+        const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+        document.getElementById('calMonthLabel').textContent=months[calMonth]+' '+calYear;
+        const grid=document.getElementById('calGrid');
+        const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        let html=days.map(d=>'<div class="cal-head">'+d+'</div>').join('');
+        const first=new Date(calYear,calMonth,1).getDay();
+        const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+        const today=new Date();
+        const f=data.friends[currentFriend]||data.friends[1];
+        const activityMap={};
+        (f.activities||[]).forEach(a=>{const d=new Date(a.time);if(d.getMonth()===calMonth&&d.getFullYear()===calYear){const day=d.getDate();activityMap[day]=(activityMap[day]||0)+1}});
+        for(let i=0;i<first;i++)html+='<div class="cal-day" style="opacity:0"></div>';
+        let totalDays=0,totalHours=0;
+        for(let d=1;d<=daysInMonth;d++){
+            const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+            const isFuture=new Date(calYear,calMonth,d)>today;
+            const count=activityMap[d]||0;
+            let cls='cal-day';
+            if(isToday)cls+=' today';
+            if(isFuture)cls+=' future';
+            if(count>0)cls+=count>=3?' high-activity':' has-activity';
+            html+='<div class="'+cls+'" title="'+count+' activities" onclick="showDayActivities('+d+')">'+d+'</div>';
+            if(!isFuture&&count>0){totalDays++;totalHours+=count*0.5}
+        }
+        document.getElementById('calGrid').innerHTML=html;
+        document.getElementById('calSummary').innerHTML=
+            '<div style="text-align:center;padding:16px;background:rgba(108,92,231,.08);border-radius:10px"><div style="font-size:1.5rem;font-weight:700;color:var(--primary)">'+totalDays+'</div><div style="font-size:.75rem;color:var(--muted)">Active Days</div></div>'+
+            '<div style="text-align:center;padding:16px;background:rgba(0,184,148,.08);border-radius:10px"><div style="font-size:1.5rem;font-weight:700;color:var(--success)">'+Object.keys(activityMap).length+'</div><div style="font-size:.75rem;color:var(--muted)">Days Logged</div></div>'+
+            '<div style="text-align:center;padding:16px;background:rgba(253,121,168,.08);border-radius:10px"><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">'+f.streak+'</div><div style="font-size:.75rem;color:var(--muted)">Current Streak</div></div>';
+    }
+    function changeCalMonth(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--}renderCalendar()}
+    function showDayActivities(day){
+        const f=data.friends[currentFriend]||data.friends[1];
+        const acts=(f.activities||[]).filter(a=>{const d=new Date(a.time);return d.getDate()===day&&d.getMonth()===calMonth&&d.getFullYear()===calYear});
+        if(!acts.length)return alert('No activities on this day');
+        alert('Activities on '+day+'/'+(calMonth+1)+':\n\n'+acts.map(a=>a.type+': '+a.desc+' ('+Math.round(a.duration/60)+'min)').join('\n'));
+    }
+
+    // ===== NOTES =====
+    let editingNoteId=null;
+    const noteColors=['#6c5ce7','#00cec9','#fd79a8','#00b894','#fdcb6e','#e17055','#a29bfe','#55efc4'];
+    function renderNotes(){
+        if(!data.notes)data.notes=[];
+        const grid=document.getElementById('notesGrid');
+        if(!data.notes.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><i class="fas fa-sticky-note"></i><p>No notes yet. Create one!</p></div>';return}
+        grid.innerHTML=data.notes.map(n=>'<div class="note-card" style="border-left:3px solid '+(n.color||'#6c5ce7')+'" onclick="editNote('+n.id+')"><div class="note-actions"><button class="btn bsm bc" onclick="event.stopPropagation();deleteNote('+n.id+')"><i class="fas fa-trash"></i></button></div><div class="note-title"><span style="color:'+(n.color||'#6c5ce7')+'">●</span> '+esc(n.title||'Untitled')+'</div><div class="note-preview">'+esc(n.content||'')+'</div><div class="note-date"><i class="fas fa-clock"></i> '+new Date(n.updatedAt||n.createdAt).toLocaleDateString()+'</div></div>').join('');
+    }
+    function createNote(){
+        editingNoteId=null;
+        document.getElementById('noteTitleInput').value='';
+        document.getElementById('noteContentInput').value='';
+        document.getElementById('noteEditorTitle').textContent='New Note';
+        document.getElementById('noteEditorWrap').style.display='block';
+        document.getElementById('noteColors').innerHTML=noteColors.map((c,i)=>'<div class="note-color '+(i===0?'active':'')+'" style="background:'+c+'" onclick="pickNoteColor(this,\''+c+'\')"></div>').join('');
+        document.getElementById('noteContentInput').focus();
+    }
+    function editNote(id){
+        const note=data.notes.find(n=>n.id===id);if(!note)return;
+        editingNoteId=id;
+        document.getElementById('noteTitleInput').value=note.title||'';
+        document.getElementById('noteContentInput').value=note.content||'';
+        document.getElementById('noteEditorTitle').textContent='Edit Note';
+        document.getElementById('noteEditorWrap').style.display='block';
+        document.getElementById('noteColors').innerHTML=noteColors.map(c=>'<div class="note-color '+(c===note.color?'active':'')+'" style="background:'+c+'" onclick="pickNoteColor(this,\''+c+'\')"></div>').join('');
+    }
+    function pickNoteColor(el,color){
+        document.querySelectorAll('.note-color').forEach(c=>c.classList.remove('active'));
+        el.classList.add('active');
+    }
+    function saveNote(){
+        const title=document.getElementById('noteTitleInput').value.trim();
+        const content=document.getElementById('noteContentInput').value.trim();
+        const activeColor=document.querySelector('.note-color.active');
+        const color=activeColor?activeColor.style.background:'#6c5ce7';
+        if(!title&&!content)return alert('Write something first!');
+        if(!data.notes)data.notes=[];
+        if(editingNoteId){
+            const note=data.notes.find(n=>n.id===editingNoteId);
+            if(note){note.title=title;note.content=content;note.color=color;note.updatedAt=new Date().toISOString()}
+        }else{
+            data.notes.push({id:Date.now(),title,content,color,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+        }
+        saveData(data);renderNotes();closeNoteEditor();
+    }
+    function deleteNote(id){if(!confirm('Delete this note?'))return;data.notes=data.notes.filter(n=>n.id!==id);saveData(data);renderNotes()}
+    function closeNoteEditor(){editingNoteId=null;document.getElementById('noteEditorWrap').style.display='none'}
+
+    // ===== AMBIENCE SOUNDS =====
+    let masterVolume=0.8;
+    const sounds=[
+        {id:'rain',icon:'🌧️',name:'Rain',freq:200,type:'rain'},
+        {id:'thunder',icon:'⛈️',name:'Thunder',freq:80,type:'thunder'},
+        {id:'forest',icon:'🌲',name:'Forest',freq:400,type:'forest'},
+        {id:'ocean',icon:'🌊',name:'Ocean',freq:150,type:'ocean'},
+        {id:'cafe',icon:'☕',name:'Cafe',freq:300,type:'cafe'},
+        {id:'fire',icon:'🔥',name:'Fireplace',freq:250,type:'fire'},
+        {id:'wind',icon:'💨',name:'Wind',freq:180,type:'wind'},
+        {id:'whitenoise',icon:'📻',name:'White Noise',freq:500,type:'white'},
+        {id:'pinknoise',icon:'🎵',name:'Pink Noise',freq:350,type:'pink'},
+        {id:'night',icon:'🦗',name:'Night',freq:600,type:'night'},
+        {id:'birds',icon:'🐦',name:'Birds',freq:800,type:'birds'},
+        {id:'piano',icon:'🎹',name:'Piano',freq:440,type:'piano'}
+    ];
+    let activeSounds={};
+    function initSounds(){
+        document.getElementById('soundsGrid').innerHTML=sounds.map(s=>'<div class="sound-card" id="sc-'+s.id+'" onclick="toggleSound(\''+s.id+'\')"><span class="sound-icon">'+s.icon+'</span><div class="sound-name">'+s.name+'</div><div class="sound-vol" onclick="event.stopPropagation()"><input type="range" min="0" max="100" value="70" oninput="setSoundVolume(\''+s.id+'\',this.value)"></div><div class="mixer-bar"><div class="mixer-fill" id="mix-'+s.id+'" style="width:0%"></div></div><div class="sound-waves"></div></div>').join('');
+        renderMixer();
+    }
+    function createNoiseBuffer(type,len){
+        const sr=audioCtx.sampleRate;
+        const buf=audioCtx.createBuffer(2,sr*len,sr);
+        for(let ch=0;ch<2;ch++){
+            const d=buf.getChannelData(ch);
+            let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+            for(let i=0;i<d.length;i++){
+                const white=Math.random()*2-1;
+                if(type==='pink'){
+                    b0=0.99886*b0+white*0.0555179;b1=0.99332*b1+white*0.0750759;b2=0.969*b2+white*0.153852;
+                    b3=0.8665*b3+white*0.3104856;b4=0.55*b4+white*0.5329522;b5=-0.7616*b5-white*0.016898;
+                    d[i]=(b0+b1+b2+b3+b4+b5+b6+white*0.5362)*0.11;b6=white*0.115926;
+                }else{
+                    d[i]=white;
+                }
+            }
+        }
+        return buf;
+    }
+    function createOscBuffer(type,len){
+        const sr=audioCtx.sampleRate;
+        const buf=audioCtx.createBuffer(1,sr*len,sr);
+        const d=buf.getChannelData(0);
+        for(let i=0;i<d.length;i++){
+            const t=i/sr;
+            if(type==='rain')d[i]=(Math.random()*2-1)*Math.exp(-((t%0.3)*10))*0.3;
+            else if(type==='ocean')d[i]=Math.sin(t*0.5)*0.3*(0.5+0.5*Math.sin(t*0.1));
+            else if(type==='fire')d[i]=(Math.random()*2-1)*0.2*(0.3+0.7*Math.sin(t*2+Math.random()));
+            else if(type==='wind')d[i]=(Math.random()*2-1)*0.15*Math.sin(t*0.3)*Math.sin(t*0.07);
+            else if(type==='thunder')d[i]=(Math.random()*2-1)*Math.exp(-((t%2)*2))*0.5*(t%2<0.1?3:1);
+            else if(type==='forest')d[i]=(Math.random()*2-1)*0.1+Math.sin(t*200)*0.02*Math.sin(t*3);
+            else if(type==='cafe')d[i]=(Math.random()*2-1)*0.15*(0.5+0.5*Math.sin(t*0.2));
+            else if(type==='night')d[i]=Math.sin(t*4000)*0.02*Math.sin(t*8)+Math.sin(t*6000)*0.015*Math.sin(t*5);
+            else if(type==='birds')d[i]=Math.sin(t*2000+Math.sin(t*8)*500)*0.03*Math.max(0,Math.sin(t*0.5));
+            else if(type==='piano')d[i]=Math.sin(t*440*Math.pow(2,Math.floor(t*2)%12/12))*0.1*Math.exp(-((t*2)%1)*3);
+            else d[i]=(Math.random()*2-1)*0.2;
+        }
+        return buf;
+    }
+    function toggleSound(id){
+        if(activeSounds[id]){
+            activeSounds[id].gain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+0.5);
+            setTimeout(()=>{try{activeSounds[id].source.stop()}catch(e){}delete activeSounds[id];document.getElementById('sc-'+id).classList.remove('playing');document.getElementById('mix-'+id).style.width='0%'},500);
+        }else{
+            if(!audioCtx)audioCtx=new AudioCtx();
+            const s=sounds.find(x=>x.id===id);
+            const source=audioCtx.createBufferSource();
+            const gain=audioCtx.createGain();
+            const buf=createOscBuffer(s.type,4);
+            source.buffer=buf;source.loop=true;
+            gain.gain.value=0.7*masterVolume;
+            source.connect(gain);gain.connect(audioCtx.destination);
+            source.start();
+            activeSounds[id]={source,gain,volume:0.7};
+            document.getElementById('sc-'+id).classList.add('playing');
+            document.getElementById('mix-'+id).style.width='70%';
+        }
+        renderMixer();
+    }
+    function setSoundVolume(id,val){
+        const v=val/100;
+        if(activeSounds[id]){activeSounds[id].gain.gain.linearRampToValueAtTime(v*masterVolume,audioCtx.currentTime+0.1);activeSounds[id].volume=v}
+        document.getElementById('mix-'+id).style.width=val+'%';
+    }
+    function setMasterVolume(val){masterVolume=val/100;Object.keys(activeSounds).forEach(id=>{if(activeSounds[id])activeSounds[id].gain.gain.linearRampToValueAtTime(activeSounds[id].volume*masterVolume,audioCtx.currentTime+0.1)})}
+    function stopAllSounds(){Object.keys(activeSounds).forEach(id=>{if(activeSounds[id]){activeSounds[id].gain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+0.5);setTimeout(()=>{try{activeSounds[id].source.stop()}catch(e){}delete activeSounds[id];document.getElementById('sc-'+id).classList.remove('playing');document.getElementById('mix-'+id).style.width='0%'},500}});setTimeout(renderMixer,600)}
+    function renderMixer(){
+        const el=document.getElementById('mixerPanel');
+        const active=Object.keys(activeSounds);
+        if(!active.length){el.innerHTML='<p style="text-align:center;color:var(--muted);font-size:.85rem;padding:20px">No sounds playing. Tap a sound above to start.</p>';return}
+        el.innerHTML=active.map(id=>{const s=sounds.find(x=>x.id===id);const vol=Math.round((activeSounds[id].volume||0.7)*100);return'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="font-size:1.3rem">'+s.icon+'</span><span style="flex:1;font-size:.85rem">'+s.name+'</span><input type="range" min="0" max="100" value="'+vol+'" style="width:100px;accent-color:var(--primary)" oninput="setSoundVolume(\''+id+'\',this.value)"><button class="btn bsm bc" onclick="toggleSound(\''+id+'\')"><i class="fas fa-times"></i></button></div>'}).join('');
+    }
+    function saveSoundPreset(){
+        const preset=Object.keys(activeSounds).map(id=>({id,volume:activeSounds[id].volume}));
+        localStorage.setItem('soundPreset',JSON.stringify(preset));
+        alert('Sound preset saved!');
+    }
+
+    // ===== QUOTES =====
+    const quotes=[
+        {text:"The secret of getting ahead is getting started.",author:"Mark Twain"},
+        {text:"It always seems impossible until it's done.",author:"Nelson Mandela"},
+        {text:"Don't watch the clock; do what it does. Keep going.",author:"Sam Levenson"},
+        {text:"The only way to do great work is to love what you do.",author:"Steve Jobs"},
+        {text:"Success is not final, failure is not fatal: it is the courage to continue that counts.",author:"Winston Churchill"},
+        {text:"Believe you can and you're halfway there.",author:"Theodore Roosevelt"},
+        {text:"Hard work beats talent when talent doesn't work hard.",author:"Tim Notke"},
+        {text:"The future belongs to those who believe in the beauty of their dreams.",author:"Eleanor Roosevelt"},
+        {text:"Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.",author:"Roy T. Bennett"},
+        {text:"Learning is not attained by chance, it must be sought for with ardor.",author:"Abigail Adams"},
+        {text:"The beautiful thing about learning is that no one can take it away from you.",author:"B.B. King"},
+        {text:"Education is the passport to the future.",author:"Malcolm X"},
+        {text:"Study hard, for the well is deep, and our brains are shallow.",author:"Richard Baxter"},
+        {text:"The expert in anything was once a beginner.",author:"Helen Hayes"},
+        {text:"You don't have to be great to start, but you have to start to be great.",author:"Zig Ziglar"},
+        {text:"Small daily improvements are the key to staggering long-term results.",author:"Unknown"},
+        {text:"Focus on being productive instead of busy.",author:"Tim Ferriss"},
+        {text:"The only limit to our realization of tomorrow is our doubts of today.",author:"Franklin D. Roosevelt"},
+        {text:"It does not matter how slowly you go as long as you do not stop.",author:"Confucius"},
+        {text:"What we learn with pleasure we never forget.",author:"Alfred Mercier"},
+    ];
+    function newQuote(){
+        const q=quotes[Math.floor(Math.random()*quotes.length)];
+        document.getElementById('quoteText').textContent=q.text;
+        document.getElementById('quoteAuthor').textContent='— '+q.author;
+    }
+
+    // ===== POMODORO =====
+    let pomoState={phase:'work',minutes:25,seconds:0,total:25*60,remaining:25*60,sessions:0,maxSessions:4,breakLength:5,longBreakLength:15};
+    function renderPomodoro(){
+        const el=document.getElementById('pomodoroDisplay');
+        if(!el)return;
+        const circumference=2*Math.PI*95;
+        const progress=pomoState.remaining/pomoState.total;
+        const offset=circumference*(1-progress);
+        const timeStr=String(Math.floor(pomoState.remaining/60)).padStart(2,'0')+':'+String(pomoState.remaining%60).padStart(2,'0');
+        const phaseColor=pomoState.phase==='work'?'var(--primary)':pomoState.phase==='break'?'var(--success)':'var(--warning)';
+        el.innerHTML='<div class="pomodoro-ring"><svg viewBox="0 0 200 200"><circle class="bg-ring" cx="100" cy="100" r="95"/><circle class="fg-ring" cx="100" cy="100" r="95" stroke-dasharray="'+circumference+'" stroke-dashoffset="'+offset+'" stroke="'+phaseColor+'"/></svg><div class="pomo-time"><div style="font-size:2.2rem;font-weight:700">'+timeStr+'</div><div style="font-size:.8rem;color:var(--muted)">'+(pomoState.phase==='work'?'🍅 Focus Time':pomoState.phase==='break'?'☕ Short Break':'🌴 Long Break')+'</div></div></div><div style="display:flex;gap:6px;justify-content:center;margin-top:8px">'+Array(pomoState.maxSessions).fill(0).map((_,i)=>'<div class="pomo-dot '+(i<pomoState.sessions?'done':i===pomoState.sessions&&pomoState.phase==='work'?'active':'')+'"></div>').join('')+'</div>';
+    }
+    function startPomodoroCycle(){
+        if(isTimerRunning)return;
+        pomoState.phase='work';pomoState.remaining=pomoState.total=pomoState.minutes*60;
+        document.getElementById('sessionTypeDisplay').textContent='🍅 Pomodoro';
+        startTimer();
+        renderPomodoro();
+    }
+    function pomoComplete(){
+        playSound('done');
+        if(pomoState.phase==='work'){
+            pomoState.sessions++;
+            if(pomoState.sessions>=pomoState.maxSessions){
+                pomoState.phase='longbreak';pomoState.remaining=pomoState.total=pomoState.longBreakLength*60;
+            }else{
+                pomoState.phase='break';pomoState.remaining=pomoState.total=pomoState.breakLength*60;
+            }
+            if(Notification.permission==='granted')new Notification('🍅 Pomodoro Complete!',{body:pomoState.phase==='work'?'Time to focus!':'Take a break!',icon:'🍅'});
+        }else{
+            pomoState.phase='work';pomoState.remaining=pomoState.total=pomoState.minutes*60;
+            if(Notification.permission==='granted')new Notification('⏰ Break Over!',{body:'Time to study!',icon:'⏰'});
+        }
+        startTimer();
+        renderPomodoro();
+    }
+
+    // ===== EXPORT =====
+    function exportJSON(){
+        const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='studybuddy-export-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+    }
+    function exportCSV(){
+        let csv='Date,Type,Description,Duration (min)\n';
+        Object.values(data.friends).forEach(f=>{f.activities.forEach(a=>{csv+='"'+new Date(a.time).toISOString()+'","'+a.type+'","'+(a.desc||'').replace(/"/g,'""')+'",'+Math.round(a.duration/60)+'\n'})});
+        const blob=new Blob([csv],{type:'text/csv'});
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='studybuddy-export-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+    }
+
+    // ===== POMODORO IN TIMER =====
+    function startPomodoroFromTimer(){
+        if(isTimerRunning){if(!confirm('Timer is running. Stop it and start Pomodoro?'))return;stopTimer()}
+        pomoState.sessions=0;pomoState.phase='work';
+        startPomodoroCycle();
+    }
+
+    // ===== AGENDA =====
+    function renderAgenda(){
+        const f=data.friends[currentFriend]||data.friends[1];
+        const today=new Date().toDateString();
+        const reminders=(data.reminders||[]).filter(r=>{
+            if(!r.enabled)return false;
+            const rt=new Date(r.time);
+            if(r.repeat==='daily')return true;
+            if(r.repeat==='weekdays')return[1,2,3,4,5].includes(rt.getDay());
+            if(r.repeat==='weekends')return[0,6].includes(rt.getDay());
+            return rt.toDateString()===today;
+        }).sort((a,b)=>new Date(a.time)-new Date(b.time));
+        const schedule=(data.schedule||[]).sort((a,b)=>a.time.localeCompare(b.time));
+        const el=document.getElementById('agendaList');
+        if(!reminders.length&&!schedule.length){el.innerHTML='<div class="empty"><i class="fas fa-calendar-check"></i><p>No agenda items. Set reminders or schedule!</p></div>';return}
+        let html='';
+        if(schedule.length){
+            html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:8px;font-weight:600">SCHEDULE</div>';
+            html+=schedule.map(s=>'<div class="ai" style="border-left:3px solid var(--secondary)"><div class="aic" style="background:rgba(0,206,201,.2)">📋</div><div class="ainf"><h4>'+esc(s.activity)+'</h4><p>⏰ '+s.time+'</p></div></div>').join('');
+        }
+        if(reminders.length){
+            html+='<div style="font-size:.75rem;color:var(--muted);margin:12px 0 8px;font-weight:600">REMINDERS</div>';
+            html+=reminders.map(r=>'<div class="ai" style="border-left:3px solid var(--warning)"><div class="aic" style="background:rgba(253,203,110,.2)">🔔</div><div class="ainf"><h4>'+esc(r.title)+'</h4><p>⏰ '+r.time+' • '+r.repeat+'</p></div><button class="btn bsm bc" onclick="toggleReminder('+r.id+')">'+(r.enabled?'<i class="fas fa-pause"></i>':'<i class="fas fa-play"></i>')+'</button></div>').join('');
+        }
+        el.innerHTML=html;
+    }
+
+    // ===== POMODORO INTEGRATION =====
+    function startPomodoroFromTimer(){
+        if(isTimerRunning){if(!confirm('Timer is running. Stop it and start Pomodoro?'))return;stopTimer()}
+        pomoState.sessions=0;pomoState.phase='work';
+        startPomodoroCycle();
+    }
+    // Override timer completion for pomodoro
+    const _origTimerComplete=typeof timerComplete==='function'?timerComplete:null;
+    function timerComplete(){
+        if(pomodoroMode){pomoComplete();return}
+        playSound('done');
+        if(isTimerRunning)stopTimer();
+    }
 
     // ===== 3D CANVAS EFFECTS =====
     function init3D(){
@@ -1884,6 +2451,16 @@
             setTimeout(()=>ripple.remove(),1500);
         });
     }
+
+    // Init
+    function init(){
+        showLoading();
+        initFirebase();
+        init3D();
+        initSounds();
+        newQuote();
+    }
+    init();
     </script>
 </body>
 </html>
