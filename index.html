@@ -1960,11 +1960,14 @@
         const f=data.friends[currentFriend]||data.friends[1];
         const ids=Object.keys(data.friends);
         const unlocked=ALL_BADGES.filter(b=>b.check(f,ids));
-        document.getElementById('achieveStats').innerHTML=
+        const stats=document.getElementById('achieveStats');
+        const grid=document.getElementById('badgeGrid');
+        if(!stats||!grid)return;
+        stats.innerHTML=
             '<div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:var(--warning)">'+unlocked.length+'</div><div style="font-size:.75rem;color:var(--muted)">Unlocked</div></div>'+
             '<div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:var(--muted)">'+(ALL_BADGES.length-unlocked.length)+'</div><div style="font-size:.75rem;color:var(--muted)">Locked</div></div>'+
             '<div style="text-align:center"><div style="font-size:1.8rem;font-weight:700;color:var(--success)">'+Math.round(unlocked.length/ALL_BADGES.length*100)+'%</div><div style="font-size:.75rem;color:var(--muted)">Complete</div></div>';
-        document.getElementById('badgeGrid').innerHTML=ALL_BADGES.map(b=>{
+        grid.innerHTML=ALL_BADGES.map(b=>{
             const isUnlocked=unlocked.includes(b);
             return'<div class="badge-card '+(isUnlocked?'unlocked':'locked')+'"><span class="badge-icon">'+b.icon+'</span><div class="badge-name">'+b.name+'</div><div class="badge-desc">'+b.desc+'</div></div>';
         }).join('');
@@ -1975,10 +1978,13 @@
         const ids=Object.keys(data.friends);
         const ranked=ids.map(id=>{const f=data.friends[id];return{id,...f,xp:f.xp||0,level:f.level||1,score:(f.xp||0)+((f.level||1)*100)+(f.streak*50)}}).sort((a,b)=>b.score-a.score);
         const colors=['#6c5ce7','#00cec9','#fd79a8','#00b894','#fdcb6e','#e17055'];
+        const podiumEl=document.getElementById('podium');
+        const listEl=document.getElementById('lbList');
+        if(!podiumEl||!listEl)return;
         // Podium (top 3)
         const podium=ranked.slice(0,3);
         const podiumOrder=podium.length>=3?[podium[1],podium[0],podium[2]]:podium.length===2?[podium[1],podium[0]]:[podium[0]];
-        document.getElementById('podium').innerHTML=podiumOrder.map((p,i)=>{
+        podiumEl.innerHTML=podiumOrder.map((p,i)=>{
             const realRank=i===0?2:i===1?1:i===2?3:i+1;
             const c=colors[ids.indexOf(p.id)%colors.length];
             const barH=realRank===1?120:realRank===2?90:70;
@@ -1986,10 +1992,10 @@
             if(p.avatar&&p.avatar.startsWith('data:'))avHtml='<img src="'+p.avatar+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
             else if(p.avatar)avHtml=p.avatar;
             else avHtml=p.name.substring(0,2).toUpperCase();
-            return'<div class="lb-place"><div class="lb-avatar" style="background:'+c+'">'+(realRank===1?'<span class="lb-crown">👑</span>':'')+avHtml+'</div><div class="lb-name">'+p.name+'</div><div class="lb-xp">'+p.xp+' XP • Lv.'+p.level+'</div><div class="lb-bar" style="background:'+c+';height:'+barH+'px"></div><div style="font-size:1.2rem;margin-top:6px">'+(realRank===1?'🥇':realRank===2?'🥈':realRank===3?'三等奖':'')+'</div></div>';
+            return'<div class="lb-place"><div class="lb-avatar" style="background:'+c+'">'+(realRank===1?'<span class="lb-crown">👑</span>':'')+avHtml+'</div><div class="lb-name">'+p.name+'</div><div class="lb-xp">'+p.xp+' XP • Lv.'+p.level+'</div><div class="lb-bar" style="background:'+c+';height:'+barH+'px"></div><div style="font-size:1.2rem;margin-top:6px">'+(realRank===1?'🥇':realRank===2?'🥈':realRank===3?'🥉':'')+'</div></div>';
         }).join('');
         // List
-        document.getElementById('lbList').innerHTML=ranked.map((r,i)=>{
+        listEl.innerHTML=ranked.map((r,i)=>{
             const c=colors[ids.indexOf(r.id)%colors.length];
             let avHtml='';
             if(r.avatar&&r.avatar.startsWith('data:'))avHtml='<img src="'+r.avatar+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
@@ -2002,8 +2008,11 @@
     // ===== CALENDAR =====
     function renderCalendar(){
         const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-        document.getElementById('calMonthLabel').textContent=months[calMonth]+' '+calYear;
+        const ml=document.getElementById('calMonthLabel');
         const grid=document.getElementById('calGrid');
+        const summary=document.getElementById('calSummary');
+        if(!ml||!grid)return;
+        ml.textContent=months[calMonth]+' '+calYear;
         const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         let html=days.map(d=>'<div class="cal-head">'+d+'</div>').join('');
         const first=new Date(calYear,calMonth,1).getDay();
@@ -2026,7 +2035,7 @@
             if(!isFuture&&count>0){totalDays++;totalHours+=count*0.5}
         }
         document.getElementById('calGrid').innerHTML=html;
-        document.getElementById('calSummary').innerHTML=
+        if(summary)summary.innerHTML=
             '<div style="text-align:center;padding:16px;background:rgba(108,92,231,.08);border-radius:10px"><div style="font-size:1.5rem;font-weight:700;color:var(--primary)">'+totalDays+'</div><div style="font-size:.75rem;color:var(--muted)">Active Days</div></div>'+
             '<div style="text-align:center;padding:16px;background:rgba(0,184,148,.08);border-radius:10px"><div style="font-size:1.5rem;font-weight:700;color:var(--success)">'+Object.keys(activityMap).length+'</div><div style="font-size:.75rem;color:var(--muted)">Days Logged</div></div>'+
             '<div style="text-align:center;padding:16px;background:rgba(253,121,168,.08);border-radius:10px"><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">'+f.streak+'</div><div style="font-size:.75rem;color:var(--muted)">Current Streak</div></div>';
@@ -2106,7 +2115,9 @@
     ];
     let activeSounds={};
     function initSounds(){
-        document.getElementById('soundsGrid').innerHTML=sounds.map(s=>'<div class="sound-card" id="sc-'+s.id+'" onclick="toggleSound(\''+s.id+'\')"><span class="sound-icon">'+s.icon+'</span><div class="sound-name">'+s.name+'</div><div class="sound-vol" onclick="event.stopPropagation()"><input type="range" min="0" max="100" value="70" oninput="setSoundVolume(\''+s.id+'\',this.value)"></div><div class="mixer-bar"><div class="mixer-fill" id="mix-'+s.id+'" style="width:0%"></div></div><div class="sound-waves"></div></div>').join('');
+        const grid=document.getElementById('soundsGrid');
+        if(!grid)return;
+        grid.innerHTML=sounds.map(s=>'<div class="sound-card" id="sc-'+s.id+'" onclick="toggleSound(\''+s.id+'\')"><span class="sound-icon">'+s.icon+'</span><div class="sound-name">'+s.name+'</div><div class="sound-vol" onclick="event.stopPropagation()"><input type="range" min="0" max="100" value="70" oninput="setSoundVolume(\''+s.id+'\',this.value)"></div><div class="mixer-bar"><div class="mixer-fill" id="mix-'+s.id+'" style="width:0%"></div></div><div class="sound-waves"></div></div>').join('');
         renderMixer();
     }
     function createNoiseBuffer(type,len){
@@ -2212,8 +2223,10 @@
     ];
     function newQuote(){
         const q=quotes[Math.floor(Math.random()*quotes.length)];
-        document.getElementById('quoteText').textContent=q.text;
-        document.getElementById('quoteAuthor').textContent='— '+q.author;
+        const qt=document.getElementById('quoteText');
+        const qa=document.getElementById('quoteAuthor');
+        if(qt)qt.textContent=q.text;
+        if(qa)qa.textContent='— '+q.author;
     }
 
     // ===== POMODORO =====
@@ -2230,8 +2243,8 @@
     }
     function startPomodoroCycle(){
         if(isTimerRunning)return;
-        pomoState.phase='work';pomoState.remaining=pomoState.total=pomoState.minutes*60;
-        document.getElementById('sessionTypeDisplay').textContent='🍅 Pomodoro';
+        pomoState.sessions=0;pomoState.phase='work';pomoState.remaining=pomoState.total=pomoState.minutes*60;
+        currentSessionType='study';timerSeconds=pomoState.remaining;updateTimerDisplay();
         startTimer();
         renderPomodoro();
     }
@@ -2244,11 +2257,12 @@
             }else{
                 pomoState.phase='break';pomoState.remaining=pomoState.total=pomoState.breakLength*60;
             }
-            if(Notification.permission==='granted')new Notification('🍅 Pomodoro Complete!',{body:pomoState.phase==='work'?'Time to focus!':'Take a break!',icon:'🍅'});
+            if(Notification.permission==='granted')new Notification('🍅 Pomodoro Complete!',{body:pomoState.phase==='longbreak'?'Take a long break!':'Take a 5 min break!',icon:'🍅'});
         }else{
             pomoState.phase='work';pomoState.remaining=pomoState.total=pomoState.minutes*60;
-            if(Notification.permission==='granted')new Notification('⏰ Break Over!',{body:'Time to study!',icon:'⏰'});
+            if(Notification.permission==='granted')new Notification('⏰ Break Over!',{body:'Time to focus!',icon:'⏰'});
         }
+        timerSeconds=pomoState.remaining;updateTimerDisplay();
         startTimer();
         renderPomodoro();
     }
@@ -2265,13 +2279,6 @@
         const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='studybuddy-export-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
     }
 
-    // ===== POMODORO IN TIMER =====
-    function startPomodoroFromTimer(){
-        if(isTimerRunning){if(!confirm('Timer is running. Stop it and start Pomodoro?'))return;stopTimer()}
-        pomoState.sessions=0;pomoState.phase='work';
-        startPomodoroCycle();
-    }
-
     // ===== AGENDA =====
     function renderAgenda(){
         const f=data.friends[currentFriend]||data.friends[1];
@@ -2286,6 +2293,7 @@
         }).sort((a,b)=>new Date(a.time)-new Date(b.time));
         const schedule=(data.schedule||[]).sort((a,b)=>a.time.localeCompare(b.time));
         const el=document.getElementById('agendaList');
+        if(!el)return;
         if(!reminders.length&&!schedule.length){el.innerHTML='<div class="empty"><i class="fas fa-calendar-check"></i><p>No agenda items. Set reminders or schedule!</p></div>';return}
         let html='';
         if(schedule.length){
@@ -2297,20 +2305,6 @@
             html+=reminders.map(r=>'<div class="ai" style="border-left:3px solid var(--warning)"><div class="aic" style="background:rgba(253,203,110,.2)">🔔</div><div class="ainf"><h4>'+esc(r.title)+'</h4><p>⏰ '+r.time+' • '+r.repeat+'</p></div><button class="btn bsm bc" onclick="toggleReminder('+r.id+')">'+(r.enabled?'<i class="fas fa-pause"></i>':'<i class="fas fa-play"></i>')+'</button></div>').join('');
         }
         el.innerHTML=html;
-    }
-
-    // ===== POMODORO INTEGRATION =====
-    function startPomodoroFromTimer(){
-        if(isTimerRunning){if(!confirm('Timer is running. Stop it and start Pomodoro?'))return;stopTimer()}
-        pomoState.sessions=0;pomoState.phase='work';
-        startPomodoroCycle();
-    }
-    // Override timer completion for pomodoro
-    const _origTimerComplete=typeof timerComplete==='function'?timerComplete:null;
-    function timerComplete(){
-        if(pomodoroMode){pomoComplete();return}
-        playSound('done');
-        if(isTimerRunning)stopTimer();
     }
 
     // ===== 3D CANVAS EFFECTS =====
