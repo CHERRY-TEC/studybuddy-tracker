@@ -391,7 +391,7 @@
     </div>
 
     <!-- Loading Screen -->
-    <div id="loadingScreen" class="login-page" style="display:none">
+    <div id="loadingScreen" class="login-page">
         <div style="text-align:center">
             <div style="font-size:3rem;margin-bottom:16px">📚</div>
             <div style="font-size:1.1rem;font-weight:600;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent">StudyBuddy</div>
@@ -2324,8 +2324,10 @@
 
     // ===== 3D CANVAS EFFECTS =====
     function init3D(){
+        if(typeof THREE==='undefined')return;
         // === Three.js floating particles ===
         const canvas=document.getElementById('three-canvas');
+        if(!canvas)return;
         const scene=new THREE.Scene();
         const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,.1,1000);
         camera.position.z=5;
@@ -2463,11 +2465,11 @@
 
     // Init
     function init(){
-        showLoading();
-        initFirebase();
-        init3D();
-        initSounds();
-        newQuote();
+        try{showLoading();}catch(e){}
+        try{initFirebase();}catch(e){console.error(e)}
+        try{init3D();}catch(e){console.error('3D init failed:',e)}
+        try{initSounds();}catch(e){console.error(e)}
+        try{newQuote();}catch(e){console.error(e)}
     }
     init();
     </script>
