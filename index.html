@@ -903,6 +903,7 @@
     function initFirebase(){
         try{
             if(typeof firebase==='undefined')return;
+            if(fbAuth)return; // already initialized
             firebase.initializeApp(firebaseConfig);
             fbDb=firebase.database();
             fbAuth=firebase.auth();
@@ -1093,7 +1094,14 @@
         if(!email||!pass)return showAuthError('Fill all fields');
         showLoading();
         try{
-            if(!fbAuth){initFirebase();if(!fbAuth){showLoginPage();return showAuthError('Setup Firebase first (Friends page)')}}
+            if(!fbAuth){
+                // Wait up to 5s for Firebase to load
+                for(let i=0;i<50;i++){
+                    await new Promise(r=>setTimeout(r,100));
+                    if(fbAuth)break;
+                }
+            }
+            if(!fbAuth){showLoginPage();return showAuthError('Cannot connect to server. Check your internet.')}
             await fbAuth.signInWithEmailAndPassword(email,pass);
             showMainApp();
         }catch(e){showLoginPage();showAuthError(e.message.replace('Firebase: ','').replace(/\(auth\/.*\)\.?/,''))}
@@ -1107,7 +1115,8 @@
         if(pass.length<6)return showAuthError('Password must be 6+ characters');
         showLoading();
         try{
-            if(!fbAuth){initFirebase();if(!fbAuth){showLoginPage();return showAuthError('Setup Firebase first (Friends page)')}}
+            if(!fbAuth){for(let i=0;i<50;i++){await new Promise(r=>setTimeout(r,100));if(fbAuth)break}}
+            if(!fbAuth){showLoginPage();return showAuthError('Cannot connect to server. Check your internet.')}
             const cred=await fbAuth.createUserWithEmailAndPassword(email,pass);
             await cred.user.updateProfile({displayName:name});
             data.friends[1].name=name;
@@ -1120,7 +1129,8 @@
     async function doGoogleLogin(){
         clearAuthError();showLoading();
         try{
-            if(!fbAuth){initFirebase();if(!fbAuth){showLoginPage();return showAuthError('Setup Firebase first (Friends page)')}}
+            if(!fbAuth){for(let i=0;i<50;i++){await new Promise(r=>setTimeout(r,100));if(fbAuth)break}}
+            if(!fbAuth){showLoginPage();return showAuthError('Cannot connect to server. Check your internet.')}
             const provider=new firebase.auth.GoogleAuthProvider();
             const cred=await fbAuth.signInWithPopup(provider);
             if(cred.additionalUserInfo&&cred.additionalUserInfo.isNewUser){
